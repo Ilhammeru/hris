@@ -59,13 +59,20 @@ if (! function_exists('menuShow')) {
 }
 
 if (!function_exists('setMenuShow')) {
-    function setMenuShow()
+    function setMenuShow($menu)
     {
         $current_name = Route::currentRouteName();
         $exp = explode('.', $current_name);
         $name = $exp[0];
 
-        return $name;
+        $res = '';
+        if (
+            $menu['url'] == $name ||
+            $menu['name'] == $name
+        ) {
+            $res = 'show';
+        }
+        return $res;
     }
 }
 
