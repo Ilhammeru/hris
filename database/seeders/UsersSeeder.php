@@ -6,6 +6,9 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UsersSeeder extends Seeder
 {
@@ -20,52 +23,38 @@ class UsersSeeder extends Seeder
 
         $user = [
             [
-                'name' => 'Super Admin',
-                'nik' => '123456789',
-                'username' => 'superadmin',
-                'email' => 'admin@mail.com',
-                'password' => bcrypt('admin'),
-                'role' => 'superadmin',
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('ilhammeru'),
+                'role' => Role::findByName('manager')->id,
                 'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Admin',
-                'nik' => '123456789',
-                'username' => 'admin',
-                'email' => 'admin@admin.com',
-                'password' => bcrypt('admin'),
-                'role' => 'admin',
+                'email' => 'hr@gmail.com',
+                'password' => Hash::make('ilhammeru'),
+                'role' => Role::findByName('hrd')->id,
                 'created_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'Member',
-                'nik' => '123456789',
-                'username' => 'member',
-                'email' => 'member@member.com',
-                'password' => bcrypt('member'),
-                'role' => 'member',
-                'created_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'Master Stockist',
-                'nik' => '123456789',
-                'username' => 'stockist',
-                'email' => 'stockist@stockist.com',
-                'password' => bcrypt('stockist'),
-                'role' => 'stockist',
-                'created_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'Fadli Stockist',
-                'nik' => '123456789',
-                'username' => 'fadli',
-                'email' => 'fadli@stockist.com',
-                'password' => bcrypt('stockist'),
-                'role' => 'stockist',
-                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
         ];
 
         User::insert($user);
+        
+        $hr = User::where('email', 'hr@gmail.com')
+            ->first();
+        $hr->assignRole(Role::findByName('hrd')->name);
+
+        $admin = User::where('email', 'admin@gmail.com')
+            ->first();
+        $admin->assignRole(Role::findByName('manager')->name);
+
+        $hrRole = Role::findByName('hrd');
+        $permissionHrd = Permission::where('name', 'show-employee')
+            ->orWhere('name', 'create-employee')
+            ->orWhere('name', 'update-employee')
+            ->orWhere('name', 'delete-employee')
+            ->orWhere('name', 'report-all-employee')
+            ->get();
+        $hrRole->syncPermissions($permissionHrd);
     }
 }

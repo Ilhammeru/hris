@@ -2,10 +2,19 @@
 <script src="{{ asset('js/iziToast.min.js') }}"></script>
 @if(session()->has('notify'))
     @foreach(session('notify') as $msg)
-        <script> 
-            "use strict";
-            iziToast.{{ $msg[0] }}({message:"{{ __($msg[1]) }}", position: "topRight"}); 
-        </script>
+        @if (is_array($msg[1]))
+            @for($a = 0; $a < count($msg[1]); $a++)
+                <script> 
+                    "use strict";
+                    iziToast.{{ $msg[0] }}({message:"{{ __($msg[1][$a]) }}", position: "topRight"}); 
+                </script>
+            @endfor
+        @else            
+            <script> 
+                "use strict";
+                iziToast.{{ $msg[0] }}({message:"{{ __($msg[1]) }}", position: "topRight"}); 
+            </script>
+        @endif
     @endforeach
 @endif
 

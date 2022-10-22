@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Title</title>
+    <title>{{ $pageTitle }}</title>
 
     <!--begin::Fonts-->
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
@@ -20,6 +20,12 @@
 	<link href="{{ asset('css/datatables.min.css') }}" rel="stylesheet" type="text/css" />
 	{{-- <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" type="text/css" /> --}}
 	<!--end::Page Vendor Stylesheets-->
+	
+	{{-- bootstrap icon --}}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+
+	{{-- global css --}}
+	<link rel="stylesheet" href="{{ asset('css/global.scss') }}">
 	@stack('styles')
 
     {{-- <!-- Styles -->
@@ -34,7 +40,7 @@
 				@include('partials.sidebar')
 				<!--begin::Wrapper-->
 				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
-					@include('partials.header')
+					@include('partials.header', ['pageTitle' => $pageTitle])
 
 					<!--begin::Content-->
 					<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -82,6 +88,9 @@
 	<!--begin::Page Vendors Javascript(used by this page)-->
 	<script src="{{ asset('js/datatables.min.js') }}"></script>
 	{{-- <script src="{{ asset('js/select2.min.js') }}"></script> --}}
+
+	{{-- sweetalert --}}
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<!--end::Page Vendors Javascript-->
 	<script>
 		var dtLanguage = {
@@ -108,6 +117,43 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
+		function setLoading(id, start) {
+			let elem = $('#' + id);
+			let loading = `<div class="spinner-border" style="width: 1em; height: 1em" role="status">
+					<span class="visually-hidden"></span>
+					</div>`;
+			if (start) {
+				elem.html(loading);
+				elem.prop('disabled', true);
+			} else {
+				elem.html(`{{ __('setting::messages.save') }}`);
+				elem.prop('disabled', false);
+			}
+		}
+
+		function setNotif(error, message) {
+			if (error) {
+				if (typeof message == 'object' || typeof message == 'array') {
+					for (let a = 0; a < message.length; a++) {
+						iziToast.error({
+							message: message[a],
+							position: "topRight"
+						});
+					}
+				} else {
+					iziToast.error({
+						message: message,
+						position: "topRight"
+					});
+				}
+			} else {
+				iziToast.success({
+					message: message,
+					position: "topRight"
+				});
+			}
+		}
 	</script>
 	@stack('scripts')
     

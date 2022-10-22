@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,9 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/user', function() {
     $pageTitle = "Template User";
@@ -25,9 +26,7 @@ Route::get('/template/profile', function() {
     return view('profile', compact('pageTitle'));
 })->name('template.profile');
 
-Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
-Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
-Route::post('/login', 'Auth\LoginController@login')->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', function() {
     $pageTitle = "Dashboard";
     return view('dashboard', compact('pageTitle'));
