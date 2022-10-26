@@ -115,7 +115,7 @@
                             </a>
                         </div>
                     @else
-                        <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ setMenuShow() == $menu['name'] ? 'show' : '' }}">
+                        <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ setMenuShow($menu) }}">
                             <span class="menu-link">
                                 <span class="menu-icon">
                                     <!--begin::Svg Icon | path: assets/media/icons/duotune/communication/com014.svg-->

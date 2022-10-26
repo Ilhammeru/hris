@@ -1,15 +1,6 @@
 <?php
 
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\UserImage;
-use App\Models\UserNetwork;
-use App\Models\Bonus;
-use App\Models\BonusLog;
 use App\Models\Menu;
-use App\Models\Prospect;
-use App\Models\Serial;
-use App\Models\Setting;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -59,13 +50,20 @@ if (! function_exists('menuShow')) {
 }
 
 if (!function_exists('setMenuShow')) {
-    function setMenuShow()
+    function setMenuShow($menu)
     {
         $current_name = Route::currentRouteName();
         $exp = explode('.', $current_name);
         $name = $exp[0];
 
-        return $name;
+        $res = '';
+        if (
+            $menu['url'] == $name ||
+            $menu['name'] == $name
+        ) {
+            $res = 'show';
+        }
+        return $res;
     }
 }
 
@@ -178,5 +176,57 @@ if (!function_exists('setTitle')) {
     function setTitle($title)
     {
         Redis::set('page_title', $title);
+    }
+}
+
+if (!function_exists('sendEmail')) {
+
+    function sendEmail($data)
+    {
+        $subjects = [
+            'register' => 'Pendaftaran Berhasil',
+        ];
+
+        $config = [
+            'name' => 'HRIS System',
+            'email' => 'gumilang.dev@gmail.com',
+            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT', 465),
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'encryption' => env('MAIL_ENCRYPTION'),
+        ];
+
+        $mail = new PHPMailer(true);
+        $html = view('email_template.register', $data)->render();
+
+        try {
+            //Server settings
+            $mail->isSMTP();
+            $mail->Host       = $config['host'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $config['username'];
+            $mail->Password   = $config['password'];
+            if ($config['encryption'] == 'ssl') {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            }else{
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            }
+            $mail->Port       = $config['port'];
+            $mail->CharSet = 'UTF-8';
+            //Recipients
+            $mail->setFrom($config['email'], $config['name']);
+            $mail->addAddress($data['receiver'], $data['receiver_name']);
+            $mail->addReplyTo($config['email'], $config['name']);
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Subject';
+            $mail->Body    = $html;
+            $mail->send();
+        } catch ( \Throwable $e) {
+            return $e->getMessage();
+        }
+
+        return true;
     }
 }

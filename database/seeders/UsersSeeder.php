@@ -49,6 +49,7 @@ class UsersSeeder extends Seeder
         $admin->assignRole(Role::findByName('manager')->name);
 
         $hrRole = Role::findByName('hrd');
+        $adminRole = Role::findByName('manager');
         $permissionHrd = Permission::where('name', 'show-employee')
             ->orWhere('name', 'create-employee')
             ->orWhere('name', 'update-employee')
@@ -56,5 +57,6 @@ class UsersSeeder extends Seeder
             ->orWhere('name', 'report-all-employee')
             ->get();
         $hrRole->syncPermissions($permissionHrd);
+        $adminRole->syncPermissions($permissionHrd);
     }
 }

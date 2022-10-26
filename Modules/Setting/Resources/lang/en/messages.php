@@ -9,7 +9,7 @@ return [
     'menu_form_name_ph' => 'Menu Name',
     'menu_form_url' => 'Url',
     'menu_form_url_ph' => 'Menu Url',
-    'menu_form_url' => 'Parent Menu',
+    'menu_form_parent' => 'Parent Menu',
     'save' => 'Save',
     'success_save' => 'Successfully stored to database',
     'confirm_delete_button' => 'Yes, Delete it!',

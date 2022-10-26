@@ -154,6 +154,46 @@
 				});
 			}
 		}
+
+		function resetForm(id) {
+			document.getElementById(id).reset();
+		}
+
+		function setDataTable(tableId, columns, route) {
+			let dt = $('#' + tableId).DataTable({
+				processing: true,
+				serverSide: true,
+				responsive: true,
+				scrollX: true,
+				ajax: route,
+				columns: columns,
+				order: [[0, 'desc']]
+			});
+			return dt;
+		}
+
+		function deleteMaster(title, cancelText, confirmText, url, dt) {
+			Swal.fire({
+                title: title,
+                showCancelButton: true,
+                cancelButtonText: cancelText,
+                confirmButtonText: confirmText,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'delete',
+                        url: url,
+                        success: function(res) {
+                            setNotif(false, res.message);
+                            dt.ajax.reload();
+                        },
+                        error: function(err) {
+                            setNotif(true, err.responseJSON == undefined ? err.responseText : err.responseJSON);
+                        }
+                    })
+                }
+            })
+		}
 	</script>
 	@stack('scripts')
     
