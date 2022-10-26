@@ -188,7 +188,7 @@
                             dt.ajax.reload();
                         },
                         error: function(err) {
-                            setNotif(true, err.responseJSON);
+                            setNotif(true, err.responseJSON == undefined ? err.responseText : err.responseJSON);
                         }
                     })
                 }

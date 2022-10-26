@@ -22,11 +22,12 @@ Route::get('/template/profile', function() {
 })->name('template.profile');
 
 Route::prefix('auth')->group(function() {
-    Route::get('/login', 'UserController@index')->name('login');
+    Route::get('/login', function() {
+        return view('auth.login');
+    })->name('login');
 });
 
 Route::prefix('user')->middleware('auth')->group(function() {
-    Route::get('/list', 'UserController@index')->name('user.list');
     Route::get('/role/ajax', 'RoleController@ajax')->name('user.role.ajax');
     Route::resource('role', 'RoleController', [
         'names' => [
@@ -41,7 +42,10 @@ Route::prefix('user')->middleware('auth')->group(function() {
     Route::get('/permission/ajax', 'PermissionController@ajax')->name('user.permission.ajax');
     Route::get('/permission-group', 'PermissionController@indexGroup')->name('user.permission-group');
     Route::get('/permission-group/list', 'PermissionController@listGroup')->name('user.permission-group.list');
+    Route::get('/permission-group/{id}', 'PermissionController@editGroup')->name('user.permission-group.edit');
+    Route::patch('/permission-group/{id}', 'PermissionController@updateGroup')->name('user.permission-group.update');
     Route::post('/permission-group', 'PermissionController@storeGroup')->name('user.permission-group.store');
+    Route::delete('/permission-group/{id}', 'PermissionController@destroyGroup')->name('user.permission-group.delete');
     Route::resource('permission', 'PermissionController', [
         'names' => [
             'index' => 'user.permission',
@@ -52,4 +56,12 @@ Route::prefix('user')->middleware('auth')->group(function() {
             'destroy' => 'user.permission.delete'
         ]
     ]);
+
+    Route::get('/list', 'UserController@index')->name('user.list');
+    Route::get('/list/ajax', 'UserController@ajax')->name('user.ajax');
+    Route::get('/create', 'UserController@create')->name('user.create');
+    Route::post('/store', 'UserController@store')->name('user.store');
+    Route::get('/{id}', 'UserController@edit')->name('user.edit');
+    Route::patch('/{id}', 'UserController@update')->name('user.update');
+    Route::delete('/{id}', 'UserController@destroy')->name('user.delete');
 });

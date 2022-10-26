@@ -17,7 +17,7 @@
     </div>
 </div>
 <div class="mb-3 row">
-    <label for="parent" class="col-sm-2 col-form-label">{{ __('setting::messages.menu_form_url') }}</label>
+    <label for="parent" class="col-sm-2 col-form-label">{{ __('setting::messages.menu_form_parent') }}</label>
     <div class="col-sm-6">
         <select name="parent" id="parent" class="form-control form-control-sm">
             <option value="" selected disabled>-- Choose --</option>

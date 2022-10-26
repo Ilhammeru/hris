@@ -1,5 +1,7 @@
 {
     "User": true,
     "Employee": true,
-    "Setting": true
+    "Setting": true,
+    "Company": true,
+    "Recruitment": true
 }

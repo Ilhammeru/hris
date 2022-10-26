@@ -6,8 +6,10 @@ use App\Models\PermissionGroup;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class PermissionController extends Controller
@@ -63,7 +65,7 @@ class PermissionController extends Controller
                 return ucfirst($data->name);
             })
             ->addColumn('action', function($d) {
-                return '<a class="btn btn-secondary c-btn-sm" href="'. route('user.permission.edit', $d->id) .'"><i class="bi bi-pen-fill p-0"></i></a>
+                return '<button class="btn btn-secondary c-btn-sm" type="button" onclick="editGroup('. $d->id .')"><i class="bi bi-pen-fill p-0"></i></button>
                 <button class="btn btn-secondary c-btn-sm" type="button" onclick="deleteItem('. $d->id .')"><i class="bi bi-trash p-0"></i></button>';
             })
             ->rawColumns(['action'])
@@ -152,7 +154,23 @@ class PermissionController extends Controller
      */
     public function edit($id)
     {
-        return view('user::edit');
+        setTitle(__('user::permissions.edit_permission'));
+
+        $data = Permission::findById($id);
+        
+        return view('user::permission.create', compact('data'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     * @param int $id
+     * @return Renderable
+     */
+    public function editGroup($id)
+    {
+        $data = PermissionGroup::find($id);
+        
+        return response()->json($data);
     }
 
     /**
@@ -163,7 +181,63 @@ class PermissionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $validate = Validator::make($request->all(), [
+                'name' => 'required',
+                'permission_group' => 'required'
+            ]);
+            if ($validate->fails()) {
+                $error = $validate->errors()->all();
+                return response()->json($error, 500);
+            }
+            
+            $permission = Permission::findById($id);
+            
+            $name = $request->name;
+            $group = $request->permission_group;
+            $exp = implode('-', explode(' ', $name));
+            $permission->name = $exp;
+            $permission->permission_group_id = $group;
+            $permission->save();
+
+            DB::commit();
+            return response()->json('Success stored permission');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json($th->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @param Request $request
+     * @param int $id
+     * @return Renderable
+     */
+    public function updateGroup(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $validate = Validator::make($request->all(), [
+                'name' => 'required'
+            ]);
+            if ($validate->fails()) {
+                $error = $validate->errors()->all();
+                return response()->json($error, 500);
+            }
+            
+            $group = PermissionGroup::find($id);
+            $name = $request->name;
+            $group->name = $name;
+            $group->save();
+
+            DB::commit();
+            return response()->json('Success update permission group');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json($th->getMessage(), 500);
+        }
     }
 
     /**
@@ -173,6 +247,64 @@ class PermissionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $permission = Permission::findById($id);
+            $roles = $permission->roles;
+
+            // detach permission
+            if (count($roles) > 0) {
+                foreach ($roles as $r) {
+                    $role = Role::findById($r->id);
+                    $role->revokePermissionTo($permission);
+                }
+            }
+
+            //delete permission
+            $permission->delete();
+            
+            DB::commit();
+            return response(['message' => 'Success delete permission']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json($th->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * @param int $id
+     * @return Renderable
+     */
+    public function destroyGroup($id)
+    {
+        DB::beginTransaction();
+        try {
+            $permission_group = PermissionGroup::find($id);
+            $roles = $permission_group->roles;
+
+            // delete all permission that related to this group id
+            $permissions = Permission::where('permission_group_id', $id)
+                ->get();
+            foreach ($permissions as $permission) {
+                // detach role has permission
+                $roles = $permission->roles;
+                foreach ($roles as $r) {
+                    $role = Role::findById($r->id);
+                    $role->revokePermissionTo($permission);
+                }
+
+                $permission->delete();
+            }
+
+            //delete all permission that related to this group id
+            $permission_group->delete();
+            
+            DB::commit();
+            return response(['message' => 'Success delete permission']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json($th->getMessage(), 500);
+        }
     }
 }

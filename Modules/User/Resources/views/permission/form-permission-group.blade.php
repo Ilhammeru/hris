@@ -3,6 +3,6 @@
         <label for="name" class="col-form-label">Name</label>
         <input type="text" class="form-control form-control-sm"
             name="name"
-            id="name">
+            id="name-group">
     </div>
 </div>
