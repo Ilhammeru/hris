@@ -65,4 +65,15 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## About HRIS
 
-This application is intended for companies that want to make the staffing system easy.
+This application is intended for companies that want to make the staffing system easy. Using MySql database.
+
+## Rules about naming the route
+
+- Please take a note, If you want to add a submenu, make sure that the parent menu has 1 syllable route name. and the route name of the submenu is added to the prefix of the parent menu. In the following example:
+    - Setting (routeName: setting)
+        - Menu (routeName: setting.menu)
+
+## Package used in this Application
+
+- Indonesian Province [Laravolt Indonesia](https://github.com/laravolt/indonesia).
+- Role / Permission Management [Spatie](https://spatie.be/docs/laravel-permission/v5/basic-usage/basic-usage).
