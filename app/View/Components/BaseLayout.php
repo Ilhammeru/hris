@@ -5,6 +5,7 @@ namespace App\View\Components;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\View\Component;
+use Modules\Recruitment\Events\MessageFromVacancy;
 
 class BaseLayout extends Component
 {
@@ -27,6 +28,7 @@ class BaseLayout extends Component
     {
         $pageTitle = Redis::get('page_title');
         $menus = json_decode(Redis::get('menus'), TRUE);
-        return view('layouts.master', compact('pageTitle', 'menus'));
+        $message_count_notif = Redis::get('message_count_notif');
+        return view('layouts.master', compact('pageTitle', 'menus', 'message_count_notif'));
     }
 }

@@ -3,5 +3,6 @@
     "Employee": true,
     "Setting": true,
     "Company": true,
-    "Recruitment": true
+    "Recruitment": true,
+    "Message": true
 }
