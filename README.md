@@ -77,3 +77,6 @@ This application is intended for companies that want to make the staffing system
 
 - Indonesian Province [Laravolt Indonesia](https://github.com/laravolt/indonesia).
 - Role / Permission Management [Spatie](https://spatie.be/docs/laravel-permission/v5/basic-usage/basic-usage).
+- RichText Editor [Quill](https://quilljs.com/docs/configuration/).
+- Range datetime picker [daterangepicker](https://www.daterangepicker.com/).
+- Tag [spatie/tag](https://spatie.be/docs/laravel-tags/v4/introduction).
