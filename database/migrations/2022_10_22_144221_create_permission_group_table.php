@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('permission_group', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
+            $table->string('name', 150);
             $table->timestamps();
         });
     }
