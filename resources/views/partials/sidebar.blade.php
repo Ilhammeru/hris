@@ -105,7 +105,13 @@
                 @foreach ($menus as $menu)
                     @if (count($menu['child']) == 0)
                         <div class="menu-item">
-                            <a class="menu-link {{ menuActive($menu['url']) }}" href="{{ route($menu['url']) }}">
+                            <a class="menu-link {{ strtolower($menu['name']) == 'inbox' ? 'position-relative' : '' }} {{ menuActive($menu['url']) }}" href="{{ route($menu['url']) }}">
+                                @if (strtolower($menu['name']) == 'inbox')
+                                    <span class="position-absolute badge rounded-pill bg-danger notif-message-badge {{ $message_count_notif ? '' : 'd-none' }}">
+                                        {{ $message_count_notif }}
+                                        {{-- <span class="visually-hidden">unread messages</span> --}}
+                                    </span>
+                                @endif
                                 <span class="menu-icon">
                                     <!--begin::Svg Icon | path: icons/duotune/general/gen025.svg-->
                                     <i class="bi {{$menu['icon']}}"></i>
@@ -128,7 +134,7 @@
                             <div class="menu-sub menu-sub-accordion">
                                 @foreach ($menu['child'] as $submenu)
                                     <div class="menu-item">
-                                        <a class="menu-link {{ menuActive([$submenu['url'], $submenu['url'] . '.create', $submenu['url'] . '.edit']) }}" href="{{ route($submenu['url']) }}">
+                                        <a class="menu-link {{ menuActive([$submenu['url'], $submenu['url'] . '.create', $submenu['url'] . '.edit', $submenu['url'] . '.show', $submenu['url'] . '.detail-vacancy-applicant']) }}" href="{{ route($submenu['url']) }}">
                                             <span class="menu-bullet">
                                                 <span class="bullet bullet-dot"></span>
                                             </span>

@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
+use Modules\Employee\Entities\Employee;
+use Modules\Recruitment\Entities\Recruitment;
+use Modules\Recruitment\Entities\VacancyMessage;
+use Modules\Recruitment\Events\MessageFromVacancy;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -172,6 +176,21 @@ if (!function_exists('setUserMenu')) {
     }
 }
 
+if (!function_exists('setMessageNotif')) {
+    function setMessageNotif() {
+        // count message
+        $count = VacancyMessage::select('id')
+        ->unread()
+        ->count();
+    
+        // add to redis
+        Redis::del('message_count_notif');
+        Redis::set('message_count_notif', json_encode($count));
+
+        event(new MessageFromVacancy($count));
+    }
+}
+
 if (!function_exists('setTitle')) {
     function setTitle($title)
     {
@@ -228,5 +247,39 @@ if (!function_exists('sendEmail')) {
         }
 
         return true;
+    }
+}
+
+if (!function_exists('create_employee_code')) {
+    function create_employee_code()
+    {
+        $current_data = Recruitment::select('id')->count();
+        if ($current_data == 0) {
+            $current_data = 1;
+        } else {
+            $current_data = $current_data + 2;
+        }
+        $code = '';
+        for ($n = 0; $n < 5; $n++) {
+            $code .= '0';
+        }
+        $code = substr($code, 0, -strlen($current_data));
+        $barcode = $code . $current_data;
+        $prefix = Employee::PREFIX_EMP_CODE;
+        return $prefix . $barcode;
+    }
+}
+
+if (!function_exists('dt_table_class')) {
+    function dt_table_class()
+    {
+        return 'align-middle table-row-dashed fs-6 gy-5 mb-0';
+    }
+}
+
+if (!function_exists('dt_head_class')) {
+    function dt_head_class()
+    {
+        return 'text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0';
     }
 }

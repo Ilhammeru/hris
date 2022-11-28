@@ -14,8 +14,16 @@ return new class extends Migration
     public function up()
     {
         Schema::create('vacancy', function (Blueprint $table) {
-            $table->id();
-
+            $table->bigIncrements('id');
+            $table->string('title')->nullable();
+            $table->integer('division_id');
+            $table->integer('department_id');
+            $table->longText('description');
+            $table->timestamp('start')->nullable();
+            $table->timestamp('end')->nullable();
+            $table->integer('needs')->default(0);
+            $table->boolean('is_active')->default(false);
+            $table->integer('created_by');
             $table->timestamps();
         });
     }

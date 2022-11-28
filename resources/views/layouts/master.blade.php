@@ -9,6 +9,13 @@
 
     <title>{{ $pageTitle }}</title>
 
+	<!-- Theme included stylesheets -->
+	<link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+	<link href="//cdn.quilljs.com/1.3.6/quill.bubble.css" rel="stylesheet">
+
+	{{-- date range picker --}}
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
     <!--begin::Fonts-->
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
     <!--end::Fonts-->
@@ -26,7 +33,24 @@
 
 	{{-- global css --}}
 	<link rel="stylesheet" href="{{ asset('css/global.scss') }}">
+
+	{{-- custom style --}}
+	<style>
+		.notif-message-badge {
+            top: 5px;
+            left: 80px;
+			font-size: 8px;
+        }
+	</style>
+
 	@stack('styles')
+
+	<!-- Main Quill library -->
+	<script src="//cdn.quilljs.com/1.3.6/quill.js"></script>
+	<script src="//cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+	{{-- pusher --}}
+	<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 
     {{-- <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet"> --}}
@@ -80,7 +104,15 @@
 	<!--end::Main-->
 
 	@include('partials.notify')
-    
+
+	{{-- tippy.js --}}
+	<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+	<script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+
+	{{-- date range picker --}}
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
     <!--begin::Global Javascript Bundle(used by all pages)-->
     <script src="{{ asset('js/plugins.bundle.js') }}"></script>
     <script src="{{ asset('js/scripts.bundle.js') }}"></script>
@@ -91,6 +123,7 @@
 
 	{{-- sweetalert --}}
 	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 	<!--end::Page Vendors Javascript-->
 	<script>
 		var dtLanguage = {
@@ -117,6 +150,32 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
+		// init all necessary data
+		initGeneral();
+
+		// pusher init
+		Pusher.logToConsole = true;
+		var pusher = new Pusher('3581279f83a8efceaa6a', {
+            cluster: 'ap1',
+            encrypted: true
+        });
+
+		// pusher for message notification
+		let targetNotif = $('.notif-message-badge');
+		var channelMessage = pusher.subscribe('message-from-vacancy');
+		channelMessage.bind('Modules\\Recruitment\\Events\\MessageFromVacancy', function(data) {
+			alert(data);
+			// TODO: Do something with notification
+			targetNotif.html(data.count);
+			if (data.count > 0) {
+				targetNotif.removeClass('d-none');
+			}
+		});
+
+		function initGeneral() {
+
+		}
 
 		function setLoading(id, start) {
 			let elem = $('#' + id);
@@ -167,6 +226,9 @@
 				scrollX: true,
 				ajax: route,
 				columns: columns,
+				drawCallback: function (settings, json) {
+					tippy('[data-tippy-content]');
+				},
 				order: [[0, 'desc']]
 			});
 			return dt;
