@@ -17,8 +17,12 @@ class LeavePermissionController extends Controller
         return view('employee::index');
     }
 
-    public function print($name, $division, $time, $need)
+    public function print(Request $request)
     {
+        $name = $request->name;
+        $division = $request->division;
+        $time = $request->time;
+        $need = $request->need;
         return view('print.leave-permission', compact('name', 'division', 'time', 'need'));
     }
 
