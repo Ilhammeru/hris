@@ -95,7 +95,8 @@ class TelegramController extends Controller
                                     $res_message['text'] .= "Nama: nama pekerja \n";
                                     $res_message['text'] .= "Bagian: bagian pekerja \n";
                                     $res_message['text'] .= "Waktu: jam / waktu pekerja keluar kantor \n";
-                                    $res_message['text'] .= "Keperluan: Alasan pekerja keluar";
+                                    $res_message['text'] .= "Keperluan: Alasan pekerja keluar \n\n";
+                            $res_message['text'] .= "Perlu di perhatikan bahwa penulisan waktu tidak boleh menggunakan '<b>:</b>'. Penulisan waktu harus seperti <b>08.00</b>";
                                     $res_message['parse_mode'] = 'HTML';
                                     $send_3 = Http::post($url, $res_message);
                                 }
@@ -117,7 +118,8 @@ class TelegramController extends Controller
                             $res_message['text'] .= "Nama: nama pekerja \n";
                             $res_message['text'] .= "Bagian: bagian pekerja \n";
                             $res_message['text'] .= "Waktu: jam / waktu pekerja keluar kantor \n";
-                            $res_message['text'] .= "Keperluan: Alasan pekerja keluar";
+                            $res_message['text'] .= "Keperluan: Alasan pekerja keluar \n\n";
+                            $res_message['text'] .= "Perlu di perhatikan bahwa penulisan waktu tidak boleh menggunakan '<b>:</b>'. Penulisan waktu harus seperti <b>08.00</b>";
                             $res_message['parse_mode'] = 'HTML';
                             Http::post($url, $res_message);
                         }
