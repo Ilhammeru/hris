@@ -72,10 +72,20 @@ Table employees {
     meta_experience longtext
     meta_education longtext
     mother_name varchar
+    user_id int [ref: > users.id]
     status tinyint [Note: '1 for permanent, 2 for internship, 3 for vaccant, 4 for reject applicant']
     internship_date timestamp [Note: 'Date when user assign the internship letter']
     permanent_date timestamp [Note: 'Date when user assign the permanent letter']
     apply_vaccant_date timestamp [Note: 'Date when user apply for available vacancy']
+    created_at timestamp
+    updated_at timestamp
+}
+
+Table users {
+    id int [pk, inicrement]
+    email varchar [not null]
+    password text [not null]
+    role int [not null]
     created_at timestamp
     updated_at timestamp
 }

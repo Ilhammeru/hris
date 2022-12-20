@@ -29,7 +29,7 @@
     <div class="col-md-6">
         <select name="job_type" class="form-control form-control-sm" id="job_type">
             @foreach ($job_type as $job)
-                <option value="{{ $job['id'] }}" {{ $data->job_type_id == $job['id'] ? 'selected' : '' }}>{{ ucfirst($job['name']) }}</option>
+                <option value="{{ $job['id'] }}" @if($type_form != 'create') {{ $data->job_type_id == $job['id'] ? 'selected' : '' }} @endif>{{ ucfirst($job['name']) }}</option>
             @endforeach
         </select>
     </div>
@@ -39,7 +39,7 @@
     <div class="col-md-6">
         <select name="working_type" class="form-control form-control-sm" id="working_type">
             @foreach ($working_type as $work)
-                <option value="{{ $work['id'] }}" {{ $data->working_type == $work['id'] ? 'selected' : '' }}>{{ ucfirst($work['name']) }}</option>
+                <option value="{{ $work['id'] }}" @if($type_form != 'create') {{ $data->working_type == $work['id'] ? 'selected' : '' }} @endif>{{ ucfirst($work['name']) }}</option>
             @endforeach
         </select>
     </div>

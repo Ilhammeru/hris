@@ -1,0 +1,100 @@
+.main-profile {
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .image-box {
+            img {
+                width: 100px;
+                height: auto;
+                border-radius: 50%;
+            }
+        }
+
+        .profile-box {
+            .name-section {
+                .text-name {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
+
+    &__sub-header {
+        padding-top: 40px;
+
+        .working-time,
+        .warning-letter {
+            line-height: 14px;
+
+            .bi {
+                font-size: 16px;
+            }
+
+            span {
+                font-size: 12px;
+            }
+        }
+    }
+
+    &__tabs {
+        .nav-tabs {
+            border-bottom: none !important;
+
+            .nav-link.active {
+                border: none;
+                border-bottom: 1px solid lightblue !important;
+                color: #000;
+                font-weight: bold;
+                
+                &:hover {
+                    border-bottom: 1px solid lightblue !important;
+                }
+            }
+
+            .nav-link {
+                color: darkgray;
+
+                &:hover {
+                    border: none;
+                    border-bottom: 1px solid lightgray !important;
+                }
+            }
+        }
+
+        &-work-experience {
+            .container-work {
+                img {
+                    width: 50px;
+                    height: auto;
+                }
+
+                .detail {
+                    .company {
+                        font-size: 10px;
+                    }
+
+                    .time {
+                        font-size: 10px;
+                        color: gray;
+                    }
+                }
+            }
+        }
+
+        &-medical-record {
+            .empty {
+                text-align: center;
+                padding: 12px;
+                background: #e6e6e6;
+
+                img {
+                    width: 200px;
+                    height: auto;
+                    mix-blend-mode: multiply;
+                }
+            }
+        }
+    }
+}

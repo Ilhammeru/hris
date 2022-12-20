@@ -5,6 +5,8 @@ use function PHPSTORM_META\map;
 return [
     'division' => 'Division',
     'department' => 'Department',
+    'position' => 'Position',
+    'employee_status' => 'Employee Status',
     'index_title_structure' => 'Structure Organization',
     'create_department' => 'Add Department',
     'edit_department' => 'Edit Department',

@@ -39,7 +39,7 @@
             <div class="divider border-bottom w-100 mb-5"></div>
 
             <form action="{{ route('employee.recruitment.store') }}" method="POST" id="form_vacancy">
-                @include('recruitment::form')
+                @include('recruitment::form', ['type_form' => 'create'])
 
                 {{-- divider --}}
                 <div class="border-top mt-5"></div>

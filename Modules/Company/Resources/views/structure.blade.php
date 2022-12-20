@@ -1,63 +1,68 @@
 @extends('company::layouts.master')
 
 @section('content')
-    {{-- begin::collapse-department --}}
-    <div class="card card-body" data-bs-toggle="collapse" href="#collapseDepartment" role="button" aria-expanded="false" aria-controls="collapseDepartment">
-        <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-0 pb-0">
-                <b>{{ __('company::company.department') }}</b>
-            </h3>
-            <button class="btn btn-sm btn-primary"
-                type="button"
-                onclick="createDept()">
-                {{ __('company::company.create_department') }}
+    <!-- begin::tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="department-tab" data-bs-toggle="tab" data-bs-target="#department-tab-pane" type="button" role="tab" aria-controls="department-tab-pane" aria-selected="true">
+                {{ __('company::company.department') }}
             </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="division-tab" data-bs-toggle="tab" data-bs-target="#division-tab-pane" type="button" role="tab" aria-controls="division-tab-pane" aria-selected="false">
+                {{ __('company::company.division') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="position-tab" data-bs-toggle="tab" data-bs-target="#position-tab-pane" type="button" role="tab" aria-controls="position-tab-pane" aria-selected="false">
+                {{__('company::company.position')}}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="emp-status-tab" data-bs-toggle="tab" data-bs-target="#emp-status-tab-pane" type="button" role="tab" aria-controls="emp-status-tab-pane" aria-selected="false">
+                {{__('company::company.employee_status')}}
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <!-- begin::department -->
+        <div class="tab-pane fade show active" id="department-tab-pane" role="tabpanel" aria-labelledby="department-tab" tabindex="0">
+            <div class="card card-body">
+                @include('company::department.index')
+            </div>
         </div>
-    </div>
-    <div class="collapse show mb-5" id="collapseDepartment">
-        <div class="card card-body">
-            @include('company::department.index')
-        </div>
-    </div>
-    {{-- end::collapse-department --}}
+        <!-- end::department -->
 
-    {{-- begin::collapse-division --}}
-    <div class="card card-body mt-5" data-bs-toggle="collapse" href="#collapseDivision" role="button" aria-expanded="false" aria-controls="collapseDivision">
-        <div class="d-flex align-items-center justify-content-between">
-            <h3>
-                <b>{{ __('company::company.division') }}</b>
-            </h3>
-            <button class="btn btn-sm btn-primary"
-                type="button"
-                onclick="createDiv()">
-                {{ __('company::company.create_division') }}
-            </button>
+        <!-- begin::division -->
+        <div class="tab-pane fade" id="division-tab-pane" role="tabpanel" aria-labelledby="division-tab" tabindex="0">
+            <div class="card card-body">
+                @include('company::division.index')
+            </div>
         </div>
+        <!-- end::division -->
+
+        <div class="tab-pane fade" id="position-tab-pane" role="tabpanel" aria-labelledby="position-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="emp-status-tab-pane" role="tabpanel" aria-labelledby="emp-status-tab" tabindex="0">...</div>
     </div>
-    <div class="collapse show" id="collapseDivision">
-        <div class="card card-body">
-            @include('company::division.index')
-        </div>
-    </div>
-    {{-- end::collapse-division --}}
+    <!-- end::tabs -->
 
     <!-- begin::modal cretea -->
     <div class="modal fade" id="modal-add-structure" tabindex="-1" aria-labelledby="modal-add-structureLabel" aria-hidden="true">
         <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="form-structure">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modal-title"></h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="modal-structure-body">
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="btn-save-structure" class="btn btn-primary btn-sm" onclick="save()">{{ __('company::company.save') }}</button>
-                </div>
-            </form>
-        </div>
+            <div class="modal-content">
+                <form id="form-structure">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modal-title"></h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modal-structure-body">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="btn-save-structure" class="btn btn-primary btn-sm" onclick="save()">{{ __('company::company.save') }}</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     <!-- begin::modal cretea -->

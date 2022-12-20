@@ -53,6 +53,12 @@
                 <!--begin::Title-->
                 <h1 class="d-flex flex-column text-dark fw-bolder fs-3 mb-0">{{ $pageTitle }}</h1>
                 <!--end::Title-->
+
+                <!--begin::Action-->
+                @if($has_action_header)
+                    <button class="btn btn-sm btn-success" type="{{$btn_type}}" @if($onclick)onclick="{{$onclick_href}}()"@endif>{{$text}}</button>
+                @endif
+                <!--end::Action-->
             </div>
             <!--end::Page title-->
         </div>

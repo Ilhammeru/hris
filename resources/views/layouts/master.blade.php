@@ -27,12 +27,25 @@
 	<link href="{{ asset('css/datatables.min.css') }}" rel="stylesheet" type="text/css" />
 	{{-- <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" type="text/css" /> --}}
 	<!--end::Page Vendor Stylesheets-->
-	
+
 	{{-- bootstrap icon --}}
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
 
 	{{-- global css --}}
 	<link rel="stylesheet" href="{{ asset('css/global.scss') }}">
+
+	{{-- less --}}
+	<script>
+		less = {
+		  env: "development",
+		  async: false,
+		  fileAsync: false,
+		  poll: 1000,
+		  functions: {},
+		  dumpLineNumbers: "comments",
+		};
+	</script>
+	<script src="{{ asset('plugins/less/dist/less.min.js') }}"></script>
 
 	{{-- custom style --}}
 	<style>
@@ -64,7 +77,14 @@
 				@include('partials.sidebar')
 				<!--begin::Wrapper-->
 				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
-					@include('partials.header', ['pageTitle' => $pageTitle])
+					@include('partials.header', [
+                        'pageTitle' => $pageTitle,
+                        'has_action_header' => $has_action_header,
+                        'btn_type' => $btn_type,
+                        'text' => $text,
+                        'onclick' => $onclick,
+                        'onclick_href' => $onclick_href
+                    ])
 
 					<!--begin::Content-->
 					<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -72,16 +92,16 @@
 						<div class="post d-flex flex-column-fluid" id="kt_post">
 							<!--begin::Container-->
 							<div id="kt_content_container" class="container-xxl">
-							
+
 								@yield('content')
-							
+
 							</div>
 							<!--end::Container-->
 						</div>
 						<!--end::Post-->
 					</div>
 					<!--end::Content-->
-					
+
                     @include('partials.footer')
 				</div>
 				<!--end::Wrapper-->
@@ -165,7 +185,6 @@
 		let targetNotif = $('.notif-message-badge');
 		var channelMessage = pusher.subscribe('message-from-vacancy');
 		channelMessage.bind('Modules\\Recruitment\\Events\\MessageFromVacancy', function(data) {
-			alert(data);
 			// TODO: Do something with notification
 			targetNotif.html(data.count);
 			if (data.count > 0) {
@@ -258,7 +277,7 @@
 		}
 	</script>
 	@stack('scripts')
-    
+
     {{-- <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script> --}}
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Menu;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -254,17 +255,13 @@ if (!function_exists('create_employee_code')) {
     function create_employee_code()
     {
         $current_data = Recruitment::select('id')->count();
-        if ($current_data == 0) {
-            $current_data = 1;
-        } else {
-            $current_data = $current_data + 2;
-        }
+
         $code = '';
         for ($n = 0; $n < 5; $n++) {
             $code .= '0';
         }
         $code = substr($code, 0, -strlen($current_data));
-        $barcode = $code . $current_data;
+        $barcode = $code . ($current_data + 1);
         $prefix = Employee::PREFIX_EMP_CODE;
         return $prefix . $barcode;
     }
@@ -281,5 +278,58 @@ if (!function_exists('dt_head_class')) {
     function dt_head_class()
     {
         return 'text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0';
+    }
+}
+
+if (!function_exists('parse_date_to_readable')) {
+    function parse_date_to_readable($date) {
+        $year = Carbon::parse($date)
+            ->diff()
+            ->format('%y');
+        $month = Carbon::parse($date)
+            ->diff()
+            ->format('%m');
+        if ($year == 0) {
+            $new = $month . ' ' . __('employee::view.month');
+        } else {
+            $new = $year . ' ' . __('employee::view.year') . ' ' . $month . ' ' . __('employee::view.month');
+        }
+
+        return $new;
+    }
+}
+
+if (!function_exists('set_link_text')) {
+    function set_link_text($param, $route, $type = 'text', $color = '') {
+        $class = '';
+        if ($type == 'button') {
+            $class = 'btn btn-' . $color . ' btn-sm';
+        }
+        return '<a class="'. $class .'" href="'. $route .'">'. $param .'</a>';
+    }
+}
+
+if (!function_exists('set_action_table')) {
+    function set_action_table($params) {
+        [$edit, $delete, $to_permanent] = ['', '', ''];
+        if (isset($params['edit'])) {
+            $edit = view('partials.action_table', [
+                    'onClick' => 'editItem',
+                    'paramOnClick' => $params['edit']['paramOnClick'],
+                    'color' => 'secondary',
+                    'text' => '<i class="bi bi-pencil-fill p-0"></i>'
+                ])->render();
+        }
+        if (isset($params['delete'])) {
+            $delete = view('partials.action_table', [
+                    'onClick' => 'deleteItem',
+                    'paramOnClick' => $params['delete']['paramOnClick'],
+                    'color' => 'secondary',
+                    'text' => '<i class="bi bi-trash p-0"></i>'
+                ])->render();
+        }
+
+        $meta = $edit . $delete . $to_permanent;
+        return $meta;
     }
 }
