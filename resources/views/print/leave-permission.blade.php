@@ -33,22 +33,22 @@
                 <tr>
                     <td>Nama</td>
                     <td>:</td>
-                    <td>Ilham</td>
+                    <td>{{ $name }}</td>
                 </tr>
                 <tr>
                     <td>Bagian</td>
                     <td>:</td>
-                    <td>IT</td>
+                    <td>{{ $division }}</td>
                 </tr>
                 <tr>
                     <td>Waktu</td>
                     <td>:</td>
-                    <td>08.00 Pagi</td>
+                    <td>{{ $time }}</td>
                 </tr>
                 <tr>
                     <td>Keperluan</td>
                     <td>:</td>
-                    <td>Beli laptop jam meja dan kursi</td>
+                    <td>{{ $need }}</td>
                 </tr>
             </tbody>
         </table>

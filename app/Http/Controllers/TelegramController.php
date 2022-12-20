@@ -106,11 +106,12 @@ class TelegramController extends Controller
                         Log::debug($spl_message);
                         if (count($spl_message) == 4) {
                             $service = new LeavePermissionService();
-                            $url = $service->create_leave_permission($spl_message);
+                            $url_action = $service->create_leave_permission($spl_message);
                             $res_message['text'] = "Permintaan izin keluar sudah dibuat ya \n";
-                            $res_message['text'] .= $url;
+                            $res_message['text'] .= '<a href="'. $url_action .'">Print disini ya</a>';
                             $res_message['parse_mode'] = "HTML";
-                            Http::post($url, $res_message);
+                            $send = Http::post($url, $res_message);
+                            Log::debug(['end' => $send]);
                         } else {
                             $res_message['text'] = "Ok. Silahkan kirim aku pesan sesuai dengan format ini ya \n\n";
                             $res_message['text'] .= "Nama: nama pekerja \n";

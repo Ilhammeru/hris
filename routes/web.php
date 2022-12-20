@@ -48,4 +48,4 @@ Route::get('/password-request', function() {
 })->name('password.request');
 
 // Print leave permission
-Route::get('/print/leave-permission', [LeavePermissionController::class, 'print'])->name('print.leave-permission');
+Route::get('/print/leave-permission/{name}/{division}/{time}/{need}', [LeavePermissionController::class, 'print'])->name('print.leave-permission');
