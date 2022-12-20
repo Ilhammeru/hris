@@ -30,7 +30,7 @@ return [
     */
     'bots'                         => [
         'mybot' => [
-            'token'               => env('TELEGRAM_BOT_TOKEN', '5796193116:AAFHQYuwJEMloS2QqukL-DwlxwJtaGe_kD0'),
+            'token'               => env('TELEGRAM_BOT_TOKEN', 'TELEGRAM_BOT_TOKEN'),
             'certificate_path'    => env('TELEGRAM_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
             'webhook_url'         => env('TELEGRAM_WEBHOOK_URL', 'https://hris.gumilang.top/api/telegram/webhook'),
             'commands'            => [

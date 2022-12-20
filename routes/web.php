@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use Modules\Employee\Http\Controllers\LeavePermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,3 +46,6 @@ Route::get('/password-email', function() {
 Route::get('/password-request', function() {
     return 'password request';
 })->name('password.request');
+
+// Print leave permission
+Route::get('/print/leave-permission', [LeavePermissionController::class, 'print'])->name('print.leave-permission');
