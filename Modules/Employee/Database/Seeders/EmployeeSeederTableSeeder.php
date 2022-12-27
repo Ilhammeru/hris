@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Modules\Company\Entities\Division;
+use Modules\Company\Entities\Position;
 use Modules\Employee\Entities\Employee;
 use Spatie\Permission\Models\Role;
 
@@ -22,13 +23,17 @@ class EmployeeSeederTableSeeder extends Seeder
      */
     public function run()
     {
+        Employee::truncate();
         DB::beginTransaction();
         try {
-            $ehs = Division::select('id', 'department_id')
-                ->where('name', 'ehs')
+
+            $ehs = Position::select('id', 'division_id')
+                ->with(['division.department'])
+                ->where('name', 'EHS')
                 ->first();
-            $recruitment = Division::select('id', 'department_id')
-                ->where('name', 'Recruitment and Development')
+            $recruitment = Position::select('id', 'division_id')
+                ->with('division.department')
+                ->where('name', 'Recruitment and People Development')
                 ->first();
             $city_id = 156; // jakarta city
             $city = \Indonesia::findCity($city_id, ['province', 'districts.villages']);
@@ -44,8 +49,11 @@ class EmployeeSeederTableSeeder extends Seeder
                 'email' => 'ricky@gmail.com',
                 'phone' => '085795795795',
                 'nik' => '3573042405960004',
-                'division_id' => $ehs->id, // ehs division
-                'department_id' => $ehs->department_id,
+                'division_id' => $ehs->division->id, // ehs division
+                'department_id' => $ehs->division->department->id,
+                'position_id' => $ehs->id,
+                'status_employee_id' => 1,
+                'date_of_birth' => Carbon::createFromDate('1996', '05', '24'),
                 'address' => 'Jl. bagong No. 5',
                 'village_id' => $village_id,
                 'district_id' => $district_id,
@@ -117,8 +125,11 @@ class EmployeeSeederTableSeeder extends Seeder
                 'email' => 'joko@gmail.com',
                 'phone' => '085795795795',
                 'nik' => '3573042405960004',
-                'division_id' => $recruitment->id, // recruitment division
-                'department_id' => $recruitment->department_id,
+                'division_id' => $recruitment->division->id, // ehs division
+                'department_id' => $recruitment->division->department->id,
+                'position_id' => $recruitment->id,
+                'date_of_birth' => Carbon::createFromDate('1996', '05', '24'),
+                'status_employee_id' => 1,
                 'address' => 'Jl. bongsor No. 5',
                 'village_id' => $village_id,
                 'district_id' => $district_id,
@@ -169,6 +180,11 @@ class EmployeeSeederTableSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
+
+            User::where('email', 'ricky@gmail.com')
+                ->delete();
+            User::where('email', 'joko@gmail.com')
+                ->delete();
 
             // create user
             $user_1 = User::insertGetId([

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             UsersSeeder::class,
             MenuSeeder::class,
+            WasteCodeSeeder::class
         ]);
     }
 }
