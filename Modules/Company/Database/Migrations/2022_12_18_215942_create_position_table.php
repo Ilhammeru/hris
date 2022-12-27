@@ -16,10 +16,7 @@ return new class extends Migration
         Schema::create('position', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->foreignId('division_id')
-                ->references('id')
-                ->on('division')
-                ->onDelete('CASCADE');
+            $table->integer('division_id');
             $table->timestamps();
         });
     }
@@ -31,9 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('position', function(Blueprint $table) {
-            $table->dropForeign(['division_id']);
-        });
         Schema::dropIfExists('position');
     }
 };
