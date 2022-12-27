@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TelegramUserChat;
+use App\Models\WasteCode;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -63,7 +66,24 @@ class TelegramController extends Controller
                 }
             } else if (!empty($item['callback_query'])) {
                 $theme = $item['callback_query']['data'];
-                
+                $room_id = $item['callback_query']['from']['id'];
+                TelegramUserChat::insert([
+                    'room_id' => $room_id,
+                    'theme' => $theme,
+                    'message' => $theme,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+
+                if ($theme == 'limbah_theme') {
+                    $waste_code = WasteCode::all();
+                    $res_message['text'] = "Baik, saya akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
+                    $res_message['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
+                    foreach ($waste_code as $k => $c) {
+                        $res_message['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
+                    }
+                    Http::post($url, $res_message);
+                }
             }
             
             return response()->json($content);
