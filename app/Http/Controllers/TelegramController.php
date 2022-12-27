@@ -20,44 +20,50 @@ class TelegramController extends Controller
         try {
             $content = $request->getContent();
             $item = json_decode($content, true);
-            Log::debug($content);
+            Log::debug($item);
             
             $url = self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
-            $chat_id = $item['message']['chat']['id'];
-            if (!empty($item['message']['text'])) {
-                $message = $item['message']['text'];
-                $res_message = [
-                    'chat_id' => $chat_id,
-                    'text' => ''
-                ];
-    
-                // greeting
-                if ($message == '/start') {
-                    $res_message['text'] = 'Hai, selamat datang di Layanan Digital MPS Brondong';
-                    $send = Http::post($url, $res_message);
-                    Log::debug($send);
-                    if (!empty($send['ok'])) {
-                        $res_message['text'] = 'Kamu bisa panggil aku CigarBot.';
-                        $send_1 = Http::post($url, $res_message);
-                        if (!empty($send_1['ok'])) {
-                            $res_message['text'] = 'Klik tombol dibawah sesuai kebutuhanmu ya, aku akan membantu dengan senang hati :)';
-                            $res_message['reply_markup'] = [
-                                'inline_keyboard' => [
-                                    [
+            if (!empty($item['message'])) {
+                $chat_id = $item['message']['chat']['id'];
+                if (!empty($item['message']['text'])) {
+                    $message = $item['message']['text'];
+                    $res_message = [
+                        'chat_id' => $chat_id,
+                        'text' => ''
+                    ];
+        
+                    // greeting
+                    if ($message == '/start') {
+                        $res_message['text'] = 'Hai, selamat datang di Layanan Digital MPS Brondong';
+                        $send = Http::post($url, $res_message);
+                        if (!empty($send['ok'])) {
+                            $res_message['text'] = 'Kamu bisa panggil aku CigarBot.';
+                            $send_1 = Http::post($url, $res_message);
+                            if (!empty($send_1['ok'])) {
+                                $res_message['text'] = 'Klik tombol dibawah sesuai kebutuhanmu ya, aku akan membantu dengan senang hati :)';
+                                $res_message['reply_markup'] = [
+                                    'inline_keyboard' => [
                                         [
-                                            'text' => 'Limbah'
-                                        ],
-                                        [
-                                            'text' => 'HRD'
+                                            [
+                                                'text' => 'Limbah',
+                                                'callback_data' => 'limbah_theme'
+                                            ],
+                                            [
+                                                'text' => 'HRD',
+                                                'callback_data' => 'hrd_theme'
+                                            ],
                                         ]
-                                    ]
-                                ],
-                                'one_time_keyboard' => true
-                            ];
-                            $send_2 = Http::post($url, $res_message);
+                                    ],
+                                    'resize_keyboard' => true
+                                ];
+                                $send_2 = Http::post($url, $res_message);
+                            }
                         }
                     }
                 }
+            } else if (!empty($item['callback_query'])) {
+                $theme = $item['callback_query']['data'];
+                
             }
             
             return response()->json($content);
