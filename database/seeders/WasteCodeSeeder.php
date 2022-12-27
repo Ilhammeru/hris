@@ -6,6 +6,7 @@ use App\Models\WasteCode;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class WasteCodeSeeder extends Seeder
 {
@@ -16,7 +17,9 @@ class WasteCodeSeeder extends Seeder
      */
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         WasteCode::truncate();
+        Schema::enableForeignKeyConstraints();
 
         WasteCode::insert([
             [
