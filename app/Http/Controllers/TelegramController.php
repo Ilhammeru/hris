@@ -51,8 +51,6 @@ class TelegramController extends Controller
             $current_chat = Redis::get('current_chat');
             $current_chat_theme = Redis::get('current_chat_theme');
             $current_step = Redis::get('current_waste_step');
-            Log::debug('current_chat_theme', ['data' => $current_chat_theme]);
-            Log::debug('current_step', ['data' => $current_step]);
 
             $res_message = [
                 'chat_id' => $room_id,

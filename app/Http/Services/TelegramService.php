@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
+use App\Models\WasteLogIn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -133,6 +134,18 @@ class TelegramService {
     public function chat_waste_by_step($step, $payload, $message = null)
     {
         $step = $this->waste_steps()[$step];
+        $current_inside_step = Redis::get('current_inside_step');
+
+        /**
+         * If current inside waste step is defined, 
+         * Then send stop the logic in here
+         * and send the next converstion
+         */
+        if ($current_inside_step) {
+            $this->chat_incoming_waste($payload, $message);
+            exit;
+        }
+
         if ($step == 'waste_code_list_and_waste_action_option') {
 
             $waste_code = WasteCode::all();
@@ -197,7 +210,7 @@ class TelegramService {
         $this->chat_waste_by_step($next_step, $payload, $chat_from_user);
     }
 
-    public function chat_incoming_waste($payload)
+    public function chat_incoming_waste($payload, $mssage = null)
     {
         $inside_step = [
             'choose_waste_code',
@@ -206,10 +219,31 @@ class TelegramService {
             'finish'
         ];
 
-        $current_inside_step = session('current_inside_step');
+        $current_inside_step = Redis::get('current_inside_step');
         if (!$current_inside_step) {
             // send first step of this waste theme
             $this->send_waste_code_list($payload);
+        } else {
+            $next_step = $current_inside_step + 1;
+            if ($inside_step[$next_step] == 'input_waste_detail') {
+                $this->send_waste_detail_data($payload);
+                
+                /**
+                 * In this section, user has been sent the selected waste code
+                 * So, we store that in database
+                 * And also for the next reply user should reply the detail of waste
+                 * 
+                 */
+                $unique_log_id = uniqid() . '-waste';
+                $model = new WasteLogIn();
+                $model->waste_log_id = $unique_log_id;
+                $model->qty = 0;
+                $model->date = date('Y-m-d');
+                $model->exp = date('Y-m-d', strtotime('+90 day'));
+                $model->code_number = '';
+                $model->save();
+                Redis::set('unique_log_id', $unique_log_id);
+            }
         }
     }
 
@@ -233,7 +267,26 @@ class TelegramService {
             'resize_keyboard' => true
         ];
         Http::post($this->url(), $payload);
-        Redis::set('current_inside_step', 'choose_waste_code');
+        Redis::set('current_inside_step', 0);
+    }
+
+    public function send_waste_detail_data($payload)
+    {
+        $this->sendAction($payload['chat_id']);
+        
+        $payload['text'] = 'Silahkan ketik 1 detail limbah yang akan masuk.';
+        Http::post($this->url(), $payload);
+
+        $payload['text'] = 'Tolong ketik dengan format seperti di chat selanjutnya ya, atau kamu bisa copy paste pesan tersebut';
+        Http::post($this->url(), $payload);
+
+        $payload['text'] = "Detail Limbah \n";
+        $payload['text'] .= "Detail =\n";
+        $payload['text'] .= "Jenis Limbah =\n";
+        $payload['text'] .= "Sifat Limbah =\n";
+        Http::post($this->url(), $payload);
+
+        Redis::set('current_inside_step', 1);
     }
     
 }
