@@ -6,6 +6,7 @@ use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * *Available session is describe bellow
@@ -98,7 +99,8 @@ class TelegramService {
     public function init_chat_with_theme($theme, $payload)
     {
         if ($theme == self::CHAT_THEME_WASTE) {
-            session(['current_chat_theme' => $theme]);
+            $sess = session(['current_chat_theme' => $theme]);
+            Log::debug('sess', ['sess' => $sess]);
             TelegramUserChat::insert([
                 'room_id' => $payload['chat_id'],
                 'theme' => $theme,
