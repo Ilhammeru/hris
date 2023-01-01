@@ -195,8 +195,10 @@ class TelegramService {
 
         $posistion = array_search($last_step_action, array_keys($this->waste_list_action()));
         $posistion_next = (int) $posistion + 1;
-        $function_name = 'send_' . $this->waste_list_action()[$posistion_next] . '_chat';
-        $this->$function_name($payload, $posistion_next, $msg);
+        if (isset($this->waste_list_action()[$posistion_next])) {
+            $function_name = 'send_' . $this->waste_list_action()[$posistion_next] . '_chat';
+            $this->$function_name($payload, $posistion_next, $msg);
+        }
     }
 
     /**
@@ -252,6 +254,8 @@ class TelegramService {
             if ($model->save()) {
                 $mod = new WasteLogIn();
                 $mod->waste_log_id = $model->id;
+                $mod->date = date('Y-m-d');
+                $mod->exp = date('Y-m-d', strtotime('+90 day'));
                 $mod->code_number = generate_waste_code_number($waste_code, $waste_code_id);
                 $mod->save();
             }
@@ -265,9 +269,10 @@ class TelegramService {
             Http::post($this->url(), $payload);
 
             $payload['text'] = "Detail Limbah \n";
-            $payload['text'] .= "Detail = <detail limbah ketik disini ya> \n";
-            $payload['text'] .= "Jenis Limbah = <jenis limbah ketik disini ya> \n";
-            $payload['text'] .= "Sifat Limbah = <sifat limbah ketik disini ya> \n";
+            $payload['text'] .= "Detail = \n";
+            $payload['text'] .= "Jenis Limbah = \n";
+            $payload['text'] .= "Sifat Limbah = \n";
+            $payload['text'] .= "Sumber Limbah = \n";
             Http::post($this->url(), $payload);
             return Redis::set('last_step_action', $next_step);
         } catch (\Throwable $th) {
@@ -275,6 +280,22 @@ class TelegramService {
             DB::rollBack();
             return $this->send_failed_to_process_message($payload);
         }
+    }
+
+    /**
+     * Function to send instuction to user to input qty of waste
+     * In this section user will be send the detail text. So it's need to be parsed and save to dataabase
+     * 
+     * @param array payload
+     * @param int next_step
+     * @param string msg
+     * 
+     * @return void
+     */
+    public function send_will_send_qty_chat($payload, $next_step, $msg)
+    {
+        $str = explode('Detail Limbah ', $msg);
+        Log::debug('msg detail', ['data' => $str]);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
