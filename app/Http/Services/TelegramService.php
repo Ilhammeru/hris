@@ -396,9 +396,9 @@ class TelegramService {
         $payload['text'] = "Berikut hasil dari inputan kamu: \n";
         $payload['text'] .= "Nomor Registrasi: " . $w->in->code_number . "\n";
         $payload['text'] .= "Kode Limbah: " . $w->code->code . "\n";
-        $payload['text'] .= "Detail Limbah: " . $w->waste_type . "\n";
-        $payload['text'] .= "Jenis Limbah: " . $w->in->waste_properties . "\n";
-        // $payload['text'] .= "Sifat Limbah: " . $w->code->code . "\n";
+        $payload['text'] .= "Detail Limbah: " . $w->waste_detail . "\n";
+        $payload['text'] .= "Jenis Limbah: " . $w->in->waste_type . "\n";
+        $payload['text'] .= "Sifat Limbah: " . $w->in->waste_properties . "\n";
         Http::post($this->url(), $payload);
         Redis::del('user_chat_theme');
         Redis::del('last_step_action');
