@@ -67,7 +67,8 @@ class TelegramController extends Controller
              */
             if ($last_step_action != null && $user_chat_theme != null) {
                 if ($user_chat_theme == $tele_service::CHAT_THEME_WASTE) {
-                    return $tele_service->generate_message_based_on_last_action_of_waste($res_message, $msg, $last_step_action);
+                    $tele_service->generate_message_based_on_last_action_of_waste($res_message, $msg, $last_step_action);
+                    exit;
                 }
             }
 
