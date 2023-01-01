@@ -65,8 +65,9 @@ class TelegramController extends Controller
              * 
              * So Check the last step action position to decide for the next move
              */
+            Log::debug('$last_step_action', ['data' => $last_step_action]);
+            Log::debug('$user_chat_theme', ['data' => $user_chat_theme]);
             if ($last_step_action && $user_chat_theme) {
-                Log::debug('success');
                 if ($user_chat_theme == $tele_service::CHAT_THEME_WASTE) {
                     $this->generate_message_based_on_last_action_of_waste($res_message, $msg, $last_step_action);
                 }
