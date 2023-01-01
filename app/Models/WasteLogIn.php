@@ -12,6 +12,7 @@ class WasteLogIn extends Model
         'waste_log_id',
         'date',
         'waste_source',
+        'waste_properties',
         'exp',
         'code_number'
     ];

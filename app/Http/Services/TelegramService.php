@@ -268,7 +268,7 @@ class TelegramService {
             $payload['text'] = 'Tolong ketik dengan format seperti di chat selanjutnya ya, atau kamu bisa copy paste pesan tersebut';
             Http::post($this->url(), $payload);
 
-            $payload['text'] = "Detail Limbah \n";
+            $payload['text'] = "Detail Limbah *$waste_code* \n";
             $payload['text'] .= "Detail = \n";
             $payload['text'] .= "Jenis Limbah = \n";
             $payload['text'] .= "Sifat Limbah = \n";
@@ -299,7 +299,14 @@ class TelegramService {
         $s = str_replace('Sifat Limbah =', 'd-', $s);
         $s = str_replace('Sumber Limbah =', 'd-', $s);
         $str_user = explode('d-', $s);
-        Log::debug('msg detail', ['data' => $str_user]);
+        $waste_type = $str_user[1];
+        $waste_properties = $str_user[2];
+        $waste_source = $str_user[3];
+        $helper = $str_user[0];
+        $exp_helper = explode('*', $helper);
+        $waste_code = $exp_helper[1];
+        Log::debug($waste_code);
+
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
