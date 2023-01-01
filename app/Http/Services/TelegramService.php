@@ -98,7 +98,7 @@ class TelegramService {
     public function init_chat_with_theme($theme, $payload)
     {
         if ($theme == self::CHAT_THEME_WASTE) {
-            session('current_chat_theme', $theme);
+            session(['current_chat_theme' => $theme]);
             TelegramUserChat::insert([
                 'room_id' => $payload['chat_id'],
                 'theme' => $theme,
@@ -107,7 +107,7 @@ class TelegramService {
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]);
-            session('current_waste_step', 1);
+            session(['current_waste_step' => 1]);
             $this->chat_waste_by_step(1, $payload);
         } else if ($theme == self::CHAT_THEME_HRD) {
             $this->under_development_chat($payload);
@@ -141,8 +141,6 @@ class TelegramService {
             }
             $payload['text'] .= "Pilih salah satu tombol di bawah ya. \n";
             Http::post($this->url(), $payload);
-
-            sleep(.5);
 
             $payload['text'] = "Jika kamu ingin keluar dari tema limbah ini, kamu bisa tekan tombol 'keluar' \n";
             $payload['reply_markup'] = [
