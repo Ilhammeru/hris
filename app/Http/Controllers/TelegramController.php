@@ -34,8 +34,6 @@ class TelegramController extends Controller
             $content = $request->getContent();
             $item = json_decode($content, true);
             Log::debug('item', ['data' => $item]);
-            
-            $url = self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
 
             // get room id
             $room_id = null;
@@ -48,9 +46,9 @@ class TelegramController extends Controller
                 $msg = $item['message']['text'];
             }
 
-            $current_chat = Redis::get('current_chat');
-            $current_chat_theme = Redis::get('current_chat_theme');
-            $current_step = Redis::get('current_waste_step');
+            $user_chat_theme = Redis::get('user_chat_theme');
+            $user_theme_action = Redis::get('user_theme_action');
+            $last_step_action = Redis::get('last_step_action');
 
             $res_message = [
                 'chat_id' => $room_id,
@@ -58,17 +56,24 @@ class TelegramController extends Controller
             ];
 
             /**
-             * If current_step session is defined,
+             * If last_step_action and user_chat_theme session is defined,
              * Then stop the login in here and
              * RUN the conversation based on THEME and STEP
+             * 
+             * If user chat theme session already define, 
+             * The last step action session is already defined to
+             * 
+             * So Check the last step action position to decide for the next move
              */
-            if ($current_step) {
-                $tele_service->conversation_by_chat($res_message, $current_step, $msg);
+            if ($last_step_action && $user_chat_theme) {
+                if ($user_chat_theme == $tele_service::CHAT_THEME_WASTE) {
+                    $this->generate_message_based_on_last_action_of_waste($res_message, $msg, $last_step_action);
+                }
                 exit;
             }
 
             if (!empty($item['message'])) {
-                $chat_id = $item['message']['chat']['id'];
+
                 if (!empty($item['message']['text'])) {
 
                     $message = $item['message']['text'];
@@ -83,15 +88,14 @@ class TelegramController extends Controller
                     }
 
                 }
+
             } else if (!empty($item['callback_query'])) {
 
-                $theme = $item['callback_query']['data'];
-                if (!$current_chat_theme) {
+                if (!$user_chat_theme) {
                     /**
-                     * Init the chat environment if user doesn't have current chat theme
+                     * Set user chat theme, sent by $item['callback_query']['data'] key
                      */
-                    $tele_service->init_chat_with_theme($theme, $res_message);
-
+                    $tele_service->set_user_chat_theme_and_send_greeting_theme($res_message, $msg);
                 }
 
             }

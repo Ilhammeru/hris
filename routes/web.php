@@ -24,12 +24,13 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/delete-redis/{key}', function($key) {
     Redis::del($key);
 });
+Route::get('/view-redis/{key}', function($key) {
+    Redis::get($key);
+});
 Route::get('flush-redis', function() {
-    Redis::del('current_chat_theme');
-    Redis::del('current_chat');
-    Redis::del('current_waste_step');
-    Redis::del('unique_log_id');
-    Redis::del('current_inside_step');
+    Redis::del('user_chat_theme');
+    Redis::del('last_step_action');
+    Redis::del('user_theme_action');
 });
 
 Route::get('/user', function() {

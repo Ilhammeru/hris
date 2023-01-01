@@ -98,165 +98,116 @@ class TelegramService {
         }
     }
 
-    public function init_chat_with_theme($theme, $payload)
+    public function set_user_chat_theme_and_send_greeting_theme($payload, $msg)
     {
-        if ($theme == self::CHAT_THEME_WASTE) {
-            Redis::set('current_chat_theme', $theme);
-            TelegramUserChat::insert([
-                'room_id' => $payload['chat_id'],
-                'theme' => $theme,
-                'message' => 'init chat theme',
-                'supposed_to_send' => 1,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]);
-            Redis::set('current_waste_step', 1);
-            $this->chat_waste_by_step(1, $payload);
-        } else if ($theme == self::CHAT_THEME_HRD) {
-            $this->under_development_chat($payload);
+        /**
+         * Validate the theme, if selected theme is under development,
+         * Then send the rollback message
+         */
+        if ($msg == self::CHAT_THEME_HRD) {
+            return $this->send_underdevelopment_chat($payload);
+        }
+
+        if ($msg == self::CHAT_THEME_WASTE) {
+            $this->send_init_waste_chat($payload);
+            Redis::set('user_chat_theme', self::CHAT_THEME_WASTE);
         }
     }
 
     /**
-     * Function to send information to user
-     * If requested theme is under development mode
+     * Function to send the rollback message to inform that selected theme is under development
      * 
      * @param array payload
      * 
      * @return void
      */
-    public function under_development_chat($payload)
+    public function send_underdevelopment_chat($payload)
     {
-        $payload['text'] = 'Mohon maaf layanan ini masih dalam tahap pengembangan, harap bersabar yaa :)';
+        $payload['text'] = 'Maaf yaa, untuk HRD masih dalam pengembangan, harap bersabar :)';
         Http::post($this->url(), $payload);
     }
 
-    public function chat_waste_by_step($step, $payload, $message = null)
+
+    /******************************************************************************** BEGIN WASTE CHAT SECTION */
+    public function waste_list_action()
     {
-        $step = $this->waste_steps()[$step];
-        $current_inside_step = Redis::get('current_inside_step');
-
-        /**
-         * If current inside waste step is defined, 
-         * Then send stop the logic in here
-         * and send the next converstion
-         */
-        if ($current_inside_step) {
-            $this->chat_incoming_waste($payload, $message);
-            exit;
-        }
-
-        if ($step == 'waste_code_list_and_waste_action_option') {
-
-            $waste_code = WasteCode::all();
-            $payload['text'] = "Baik, aku akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
-            $payload['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
-            foreach ($waste_code as $k => $c) {
-                $payload['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
-            }
-            $payload['text'] .= "Pilih salah satu tombol di bawah ya. \n";
-            Http::post($this->url(), $payload);
-
-            $payload['text'] = "Jika kamu ingin keluar dari tema limbah ini, kamu bisa tekan tombol 'keluar' \n";
-            $payload['reply_markup'] = [
-                'inline_keyboard' => [
-                    [
-                        [
-                            'text' => 'Input Limbah Datang',
-                            'callback_data' => 'input_limbah_datang'
-                        ]
-                    ],
-                    [
-                        [
-                            'text' => 'Input Limbah Keluar',
-                            'callback_data' => 'input_limbah_keluar'
-                        ]
-                    ],
-                    [
-                        [
-                            'text' => 'List Limbah',
-                            'callback_data' => 'list_limbah'
-                        ]
-                    ],
-                    [
-                        [
-                            'text' => 'keluar',
-                            'callback_data' => 'out_of_theme'
-                        ]
-                    ],
-                ],
-                'resize_keyboard' => true
-            ];
-            Http::post($this->url(), $payload);
-            TelegramUserChat::where('room_id', $payload['chat_id'])
-                ->update([
-                    'supposed_to_send' => 2,
-                    'updated_at' => Carbon::now(),
-                    'message' => self::CHAT_THEME_WASTE
-                ]);
-
-        } else if ($step == 'waste_action') {
-
-            if ($message == 'input_limbah_datang') {
-                $this->chat_incoming_waste($payload);
-            }
-
-        }
-    }
-
-    public function conversation_by_chat($payload, $current_step, $chat_from_user)
-    {
-        $next_step = $current_step + 1;
-        $this->chat_waste_by_step($next_step, $payload, $chat_from_user);
-    }
-
-    public function chat_incoming_waste($payload, $mssage = null)
-    {
-        $inside_step = [
-            'choose_waste_code',
-            'input_waste_detail',
-            'input_waste_qty',
-            'finish'
+        return [
+            'will_choose_action_theme',
+            'will_choose_waste_code',
+            'will_send_detail_waste',
+            'will_send_qty',
+            'will_finish'
         ];
-
-        $current_inside_step = Redis::get('current_inside_step');
-        if (!$current_inside_step) {
-            // send first step of this waste theme
-            $this->send_waste_code_list($payload);
-        } else {
-            $next_step = (int) $current_inside_step + 1;
-            Redis::set('next_step', ['data' => $next_step]);
-            if ($inside_step[$next_step] == 'input_waste_detail') {
-                $this->send_waste_detail_data($payload);
-                
-                /**
-                 * In this section, user has been sent the selected waste code
-                 * So, we store that in database
-                 * And also for the next reply user should reply the detail of waste
-                 * 
-                 */
-                $unique_log_id = uniqid() . '-waste';
-                $model = new WasteLogIn();
-                $model->waste_log_id = $unique_log_id;
-                $model->qty = 0;
-                $model->date = date('Y-m-d');
-                $model->exp = date('Y-m-d', strtotime('+90 day'));
-                $model->code_number = '';
-                $model->save();
-                Redis::set('model', ['data' => $model]);
-                Redis::set('unique_log_id', $unique_log_id);
-            }
-        }
     }
 
-    public function send_waste_code_list($payload)
+    public function send_init_waste_chat($payload)
     {
         $this->sendAction($payload['chat_id']);
 
         $waste_code = WasteCode::all();
+        $payload['text'] = "Baik, aku akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
+        $payload['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
+        foreach ($waste_code as $k => $c) {
+            $payload['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
+        }
+        $payload['text'] .= "Pilih salah satu tombol di bawah ya. \n";
+        Http::post($this->url(), $payload);
+
+        $payload['text'] = "Jika kamu ingin keluar dari tema limbah ini, kamu bisa tekan tombol 'keluar' \n";
+        $payload['reply_markup'] = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => 'Input Limbah Datang',
+                        'callback_data' => 'input_limbah_datang'
+                    ]
+                ],
+                [
+                    [
+                        'text' => 'Input Limbah Keluar',
+                        'callback_data' => 'input_limbah_keluar'
+                    ]
+                ],
+                [
+                    [
+                        'text' => 'List Limbah',
+                        'callback_data' => 'list_limbah'
+                    ]
+                ],
+                [
+                    [
+                        'text' => 'keluar',
+                        'callback_data' => 'out_of_theme'
+                    ]
+                ],
+            ],
+            'resize_keyboard' => true
+        ];
+        Http::post($this->url(), $payload);
+        Redis::set('last_step_action', 0);
+    }
+
+    public function generate_message_based_on_last_action_of_waste($payload, $msg, $last_step_action)
+    {
+        $this->sendAction($payload['chat_id']);
+
+        $posistion = array_search($last_step_action, $this->waste_list_action());
+        $posistion = (int) $posistion + 1;
+        $function_name = 'send_' . $this->waste_list_action()[$posistion] . '_chat';
+        $this->$function_name($payload, $posistion);
+    }
+
+    /**
+     * Function to send chat list of waste code
+     * The purpose is user will be select on of them
+     * and Process it!
+     */
+    public function send_will_choose_waste_code_chat($payload, $next_step)
+    {
+        $waste_code = WasteCode::all();
         $payload['text'] = "Silahkan pilih kode limbah dulu ya";
         $textMarkup = [];
-        foreach ($waste_code as $c) {
+        foreach ($waste_code as $k => $c) {
             $textMarkup[] = [
                 [
                     'text' => $c->code,
@@ -269,26 +220,8 @@ class TelegramService {
             'resize_keyboard' => true
         ];
         Http::post($this->url(), $payload);
-        Redis::set('current_inside_step', 0);
+        Redis::set('last_step_action', $next_step);
     }
-
-    public function send_waste_detail_data($payload)
-    {
-        $this->sendAction($payload['chat_id']);
-        
-        $payload['text'] = 'Silahkan ketik 1 detail limbah yang akan masuk.';
-        Http::post($this->url(), $payload);
-
-        $payload['text'] = 'Tolong ketik dengan format seperti di chat selanjutnya ya, atau kamu bisa copy paste pesan tersebut';
-        Http::post($this->url(), $payload);
-
-        $payload['text'] = "Detail Limbah \n";
-        $payload['text'] .= "Detail =\n";
-        $payload['text'] .= "Jenis Limbah =\n";
-        $payload['text'] .= "Sifat Limbah =\n";
-        Http::post($this->url(), $payload);
-
-        Redis::set('current_inside_step', 1);
-    }
+    /******************************************************************************** END WASTE CHAT SECTION */
     
 }
