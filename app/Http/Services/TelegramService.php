@@ -98,7 +98,7 @@ class TelegramService {
             ]);
             session('current_waste_step', 1);
             $this->chat_waste_by_step(1, $payload);
-            
+            exit;
         } else if ($theme == self::CHAT_THEME_HRD) {
             $this->under_development_chat($payload);
         }
@@ -171,6 +171,7 @@ class TelegramService {
                     'updated_at' => Carbon::now(),
                     'message' => self::CHAT_THEME_WASTE
                 ]);
+            exit;
         }
     }
     
