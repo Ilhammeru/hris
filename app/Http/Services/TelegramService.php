@@ -207,6 +207,7 @@ class TelegramService {
      */
     public function send_will_choose_waste_code_chat($payload, $next_step, $msg)
     {
+        Log::debug('next_step', ['data' => $next_step]);
         $waste_code = WasteCode::all();
         $payload['text'] = "Silahkan pilih kode limbah dulu ya";
         $textMarkup = [];
