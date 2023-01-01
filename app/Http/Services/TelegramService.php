@@ -19,12 +19,23 @@ class TelegramService {
     const URL = 'https://api.telegram.org/bot';
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
+    const SEND_ACTION = 'sendChatAction';
     const CHAT_THEME_WASTE = 'limbah_theme';
     const CHAT_THEME_HRD = 'hrd_theme';
 
     public function url()
     {
         return self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
+    }
+
+    public function urlAction()
+    {
+        return self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_ACTION;
+    }
+
+    public function sendAction($chat_id, $type = 'typing')
+    {
+        Http::post($this->urlAction(), ['chat_id' => $chat_id, 'action' => $type]);
     }
 
     public function serviceChat()
@@ -118,7 +129,7 @@ class TelegramService {
         Http::post($this->url(), $payload);
     }
 
-    public function chat_waste_by_step($step, $payload)
+    public function chat_waste_by_step($step, $payload, $message = null)
     {
         $step = $this->waste_steps()[$step];
         if ($step == 'waste_code_list_and_waste_action_option') {
@@ -172,7 +183,58 @@ class TelegramService {
                     'message' => self::CHAT_THEME_WASTE
                 ]);
             exit;
+
+        } else if ($step == 'waste_action') {
+
+            if ($message == 'input_limbah_datang') {
+                $this->chat_incoming_waste($payload);
+            }
+
         }
+    }
+
+    public function conversation_by_chat($payload, $current_step, $chat_from_user)
+    {
+        $next_step = $current_step + 1;
+        $this->chat_waste_by_step($next_step, $payload, $chat_from_user);
+    }
+
+    public function chat_incoming_waste($payload)
+    {
+        $inside_step = [
+            'choose_waste_code',
+            'input_waste_detail',
+            'input_waste_qty',
+            'finish'
+        ];
+
+        $current_inside_step = session('current_inside_step');
+        if (!$current_inside_step) {
+            // send first step of this waste theme
+            $this->send_waste_code_list($payload);
+        }
+    }
+
+    public function send_waste_code_list($payload)
+    {
+        $this->sendAction($payload['chat_id']);
+        
+        $waste_code = WasteCode::all();
+        $payload['text'] = "Silahkan pilih kode limbah dulu ya";
+        $textMarkup = [];
+        foreach ($waste_code as $c) {
+            $textMarkup[] = [
+                [
+                    'text' => $c->code,
+                    'callback_data' => $c->code . '@type-type'
+                ]
+            ];
+        }
+        $payload['reply_markup'] = [
+            'inline_keyboard' => $textMarkup,
+            'resize_keyboard' => true
+        ];
+        Http::post($this->url(), $payload);
     }
     
 }

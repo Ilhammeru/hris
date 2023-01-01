@@ -38,19 +38,33 @@ class TelegramController extends Controller
 
             // get room id
             $room_id = null;
+            $msg = null;
             if (!empty($item['callback_query'])) {
                 $room_id = $item['callback_query']['from']['id'];
+                $msg = $item['callback_query']['data'];
             } else if (!empty($item['message'])) {
                 $room_id = $item['message']['from']['id'];
+                $msg = $item['message']['text'];
             }
 
             $current_chat = session('current_chat');
             $current_chat_theme = session('current_chat_theme');
+            $current_step = session('current_waste_step');
 
             $res_message = [
                 'chat_id' => $room_id,
                 'text' => ''
             ];
+
+            /**
+             * If current_step session is defined,
+             * Then stop the login in here and
+             * RUN the conversation based on THEME and STEP
+             */
+            if ($current_step) {
+                $tele_service->conversation_by_chat($res_message, $current_step, $msg);
+                exit;
+            }
 
             if (!empty($item['message'])) {
                 $chat_id = $item['message']['chat']['id'];
