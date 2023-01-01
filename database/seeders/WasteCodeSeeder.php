@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\DetailWasteCode;
 use App\Models\WasteCode;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -65,5 +66,38 @@ class WasteCodeSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
         ]);
+
+        // DetailWasteCode::insert([
+        //     [
+        //         'waste_code_id' => 1,
+        //         'name' => 'medis infeksius',
+        //         'created_at' => Carbon::now(),
+        //         'updated_at' => Carbon::now(),
+        //     ],
+        //     [
+        //         'waste_code_id' => 1,
+        //         'name' => 'Pembalut',
+        //         'created_at' => Carbon::now(),
+        //         'updated_at' => Carbon::now(),
+        //     ],
+        //     [
+        //         'waste_code_id' => 2,
+        //         'name' => 'ACCU / Aki',
+        //         'created_at' => Carbon::now(),
+        //         'updated_at' => Carbon::now(),
+        //     ],
+        //     [
+        //         'waste_code_id' => 2,
+        //         'name' => 'Baterai Bekas',
+        //         'created_at' => Carbon::now(),
+        //         'updated_at' => Carbon::now(),
+        //     ],
+        //     [
+        //         'waste_code_id' => 3,
+        //         'name' => '0',
+        //         'created_at' => Carbon::now(),
+        //         'updated_at' => Carbon::now(),
+        //     ],
+        // ]);
     }
 }

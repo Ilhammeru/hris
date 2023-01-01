@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\ChatService;
 use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
 use Carbon\Carbon;
@@ -21,11 +22,37 @@ class TelegramController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         try {
+            $is_finish = false;
+            $is_amount = false;
+            $is_type = false;
+            $chat_service = new ChatService();
+
             $content = $request->getContent();
             $item = json_decode($content, true);
             Log::debug($item);
             
             $url = self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
+
+            // get room id
+            $room_id = null;
+            if (!empty($item['callback_query'])) {
+                $room_id = $item['callback_query']['from']['id'];
+            } else if (!empty($item['message'])) {
+                $room_id = $item['message']['from']['id'];
+            }
+
+            // check current theme
+            $chat_theme = null;
+            // $latest_message = null;
+            // if ($room_id) {
+            //     $chat_data = TelegramUserChat::select('theme', 'message')
+            //         ->where('room_id', $room_id)
+            //         ->orderBy('id', 'desc')
+            //         ->first();
+            //     $chat_theme = $chat_data->theme;
+            //     $latest_message = $chat_data->message;
+            // }
+
             if (!empty($item['message'])) {
                 $chat_id = $item['message']['chat']['id'];
                 if (!empty($item['message']['text'])) {
@@ -34,6 +61,20 @@ class TelegramController extends Controller
                         'chat_id' => $chat_id,
                         'text' => ''
                     ];
+
+                    // define detail limbah reply
+                    $waste_detail_reply = explode('Detail Limbah ', $message);
+                    if (count($waste_detail_reply) > 1) { // !TODO: Create condition current theme
+                        $is_amount = true;
+                        goto send_amount_of_waste;
+                    }
+
+                    // define amount of waste
+                    $amw = explode(' kg', $message);
+                    if (count($amw) > 1) { // !TODO: Create condition current theme
+                        $is_finish = true;
+                        goto send_finish_confirmation;
+                    }
         
                     // greeting
                     if ($message == '/start') {
@@ -63,27 +104,184 @@ class TelegramController extends Controller
                             }
                         }
                     }
+
+                    send_amount_of_waste:
+                    if ($is_amount) {
+                        $res_message['text'] = 'Masukan berat limbah dalam satuan Kilogram';
+                        Http::post($url, $res_message);
+                        $request = [
+                            'is_new_record' => false,
+                            'room_id' => $room_id,
+                            'supposed_to_send' => 'weight_waste'
+                        ];
+                        $chat_service->save_chat($request);
+                    }
+
+                    send_finish_confirmation:
+                    if ($is_finish) {
+                        $res_message['text'] = "Baik, terima kasih. Data yang kamu input sudah tersimpan di Digital LogBook Limbah B3. \n";
+                        $res_message['text'] .= "Kamu bisa melihat list laporan terbaru yang sudah diinput dengan klik tombol 'List Limbah' saat kamu memilih layanan Limbah ya. \n";
+                        Http::post($url, $res_message);
+    
+                        sleep(.5);
+                        $res_message['text'] = 'Senang bisa membantumu :) semoga harimu menyenangkan.';
+                        Http::post($url, $res_message);
+    
+                        sleep(.5);
+                        $res_message['text'] = "Satu Tekad Satu Semangat dan Satu Tujuan Kita Pasti Bisa";
+                        Http::post($url, $res_message);
+                        $request = [
+                            'is_new_record' => false,
+                            'room_id' => $room_id,
+                            'supposed_to_send' => 'finish'
+                        ];
+                        $chat_service->save_chat($request);
+
+                        $current_waste = session('current_waste');
+                        $request_waste = [
+                            'id' => $current_waste->id,
+                            'qty' => $message
+                        ];
+                        $chat_service->save_waste_chat($request);
+                    }
                 }
             } else if (!empty($item['callback_query'])) {
                 $theme = $item['callback_query']['data'];
-                $room_id = $item['callback_query']['from']['id'];
-                TelegramUserChat::insert([
-                    'room_id' => $room_id,
-                    'theme' => $theme,
-                    'message' => $theme,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                ]);
+                $room_id = $item['callback_query']['message']['chat']['id'];
 
-                if ($theme == 'limbah_theme') {
-                    $waste_code = WasteCode::all();
-                    $res_message['text'] = "Baik, saya akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
-                    $res_message['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
-                    foreach ($waste_code as $k => $c) {
-                        $res_message['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
-                    }
-                    Http::post($url, $res_message);
+                $res_message = [
+                    'chat_id' => $room_id,
+                    'text' => ''
+                ];
+
+                // define waste code
+                $str_code = explode('@type', $theme);
+                if (count($str_code) > 1) {
+                    $is_type = true;
+                    goto send_type;
                 }
+
+                if ($chat_theme) {
+
+                } else {
+                    $current_chat = new TelegramUserChat();
+                    $current_chat->room_id = $room_id;
+                    $current_chat->theme = $theme;
+                    $current_chat->message = $theme;
+                    $current_chat->save();
+    
+                    if ($theme == 'limbah_theme') {
+                        $waste_code = WasteCode::all();
+                        $res_message['text'] = "Baik, aku akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
+                        $res_message['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
+                        foreach ($waste_code as $k => $c) {
+                            $res_message['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
+                        }
+                        $res_message['text'] .= "Pilih salah satu tombol di bawah ya. \n";
+                        Http::post($url, $res_message);
+    
+                        sleep(.5);
+    
+                        $res_message['text'] = "Jika kamu ingin keluar dari tema limbah ini, kamu bisa tekan tombol 'keluar' \n";
+                        $res_message['reply_markup'] = [
+                            'inline_keyboard' => [
+                                [
+                                    [
+                                        'text' => 'Input Limbah Datang',
+                                        'callback_data' => 'input_limbah_datang'
+                                    ]
+                                ],
+                                [
+                                    [
+                                        'text' => 'Input Limbah Keluar',
+                                        'callback_data' => 'input_limbah_keluar'
+                                    ]
+                                ],
+                                [
+                                    [
+                                        'text' => 'List Limbah',
+                                        'callback_data' => 'list_limbah'
+                                    ]
+                                ],
+                                [
+                                    [
+                                        'text' => 'keluar',
+                                        'callback_data' => 'out_of_theme'
+                                    ]
+                                ],
+                            ],
+                            'resize_keyboard' => true
+                        ];
+                        Http::post($url, $res_message);
+                    } else if ($theme == 'hrd_theme') {
+                        $res_message['text'] = 'Saya belum bisa memberikan informasi lebih lanjut tentang HRD, saya masih mengumpulkan semua informasi yang ada, harap bersabar yaa :)';
+                        Http::post($url, $res_message);
+                    } else if ($theme = 'input_limbah_datang') {
+                        $waste_code = WasteCode::all();
+                        $res_message['text'] = "Silahkan pilih kode limbah dulu ya";
+                        $textMarkup = [];
+                        foreach ($waste_code as $k => $c) {
+                            $textMarkup[] = [
+                                [
+                                    'text' => $c->code,
+                                    'callback_data' => $c->code . '@type-type'
+                                ]
+                            ];
+                        }
+                        $res_message['reply_markup'] = [
+                            'inline_keyboard' => $textMarkup,
+                            'resize_keyboard' => true
+                        ];
+                        Http::post($url, $res_message);
+
+                        $request = [
+                            'room_id' => $room_id,
+                            'theme' => $theme,
+                            'supposed_to_send' => 'waste_code',
+                            'is_new_record' => true
+                        ];
+                        $chat_service->save_chat($request);
+                    } else {
+                        send_type:
+                        if ($is_type) {
+                            // check callback type
+                            $str = explode('@type', $theme);
+                            $selected_code = $str[0];
+                            /**
+                             * User send waste code
+                             * System supposed to answer type of waste
+                             */
+                            $res_message['text'] = 'Silahkan ketik 1 detail limbah yang akan masuk.';
+                            $send = Http::post($url, $res_message);
+
+                            sleep(.5);
+                            $res_message['text'] = 'Tolong ketik dengan format seperti di chat selanjutnya ya, atau kamu bisa copy paste pesan tersebut';
+                            Http::post($url, $res_message);
+    
+                            sleep(.5);
+    
+                            $res_message['text'] = "Detail Limbah \n";
+                            $res_message['text'] .= "Detail = <detail limbah ketik disini ya> \n";
+                            $res_message['text'] .= "Jenis Limbah = <jenis limbah ketik disini ya> \n";
+                            $res_message['text'] .= "Sifat Limbah = <sifat limbah ketik disini ya> \n";
+                            Http::post($url, $res_message);
+                            $request = [
+                                'room_id' => $room_id,
+                                'theme' => $theme,
+                                'supposed_to_send' => 'waste_detail',
+                                'is_new_record' => false
+                            ];
+                            $chat_service->save_chat($request);
+
+                            $request_waste = [
+                                'waste_code' => $selected_code
+                            ];
+                            $sw = $chat_service->save_waste_chat($request_waste);
+                            session('current_waste', $sw->id);
+                        }
+                    }
+                }
+
             }
             
             return response()->json($content);
@@ -94,5 +292,21 @@ class TelegramController extends Controller
                 'message' => $th->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Function to get current chat theme
+     * @param string room_id
+     * 
+     * @return string
+     */
+    public function user_chat_data($room_id)
+    {
+        $data = TelegramUserChat::select('theme', 'message')
+            ->where('room_id', $room_id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        return $data;
     }
 }
