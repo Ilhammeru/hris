@@ -20,8 +20,8 @@ class WasteLog extends Model
         return $this->hasOne(WasteLogIn::class, 'waste_log_id');
     }
 
-    public function code():HasOne
+    public function code():BelongsTo
     {
-        return $this->hasOne(WasteCode::class, 'waste_code_id');
+        return $this->belongsTo(WasteCode::class, 'waste_code_id');
     }
 }
