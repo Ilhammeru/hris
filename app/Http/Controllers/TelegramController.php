@@ -92,7 +92,6 @@ class TelegramController extends Controller
                      * Init the chat environment if user doesn't have current chat theme
                      */
                     $tele_service->init_chat_with_theme($theme, $res_message);
-                    exit;
 
                 }
 
