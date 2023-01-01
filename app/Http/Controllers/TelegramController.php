@@ -32,7 +32,7 @@ class TelegramController extends Controller
 
             $content = $request->getContent();
             $item = json_decode($content, true);
-            Log::debug($item);
+            Log::debug('item', ['data' => $item]);
             
             $url = self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
 
@@ -51,6 +51,7 @@ class TelegramController extends Controller
             $current_chat_theme = session('current_chat_theme');
             $current_step = session('current_waste_step');
             Log::debug('current_chat_theme', ['data' => $current_chat_theme]);
+            Log::debug('current_step', ['data' => $current_step]);
 
             $res_message = [
                 'chat_id' => $room_id,
