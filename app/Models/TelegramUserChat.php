@@ -12,6 +12,7 @@ class TelegramUserChat extends Model
     protected $fillable = [
         'room_id',
         'theme',
-        'message'
+        'message',
+        'supposed_to_send'
     ];
 }
