@@ -301,9 +301,25 @@ class TelegramService {
             $s = str_replace('Sifat Limbah =', 'd-', $s);
             $s = str_replace('Sumber Limbah =', 'd-', $s);
             $str_user = explode('d-', $s);
-            $waste_type = $str_user[1];
-            $waste_properties = $str_user[2];
-            $waste_source = $str_user[3];
+
+            if (count($str_user) < 4) {
+                DB::rollBack();
+                return $this->send_format_failed($payload);
+            }
+
+            $waste_type = $str_user[1] ?? null;
+            $waste_properties = $str_user[2] ?? null;
+            $waste_source = $str_user[3] ?? null;
+
+            if (
+                $waste_type == null ||
+                $waste_properties == null ||
+                $waste_source == null
+            ) {
+                DB::rollBack();
+                return $this->send_format_failed($payload);
+            }
+
             $helper = $str_user[0];
             $exp_helper = explode('*', $helper);
             $waste_code = $exp_helper[1];
@@ -325,6 +341,7 @@ class TelegramService {
 
             $payload['text'] = 'Masukan berat limbah dalam satuan Kilogram';
             Http::post($this->url(), $payload);
+            Redis::set('waste_log_id', $model->id);
             return Redis::set('last_step_action', $next_step);
         } catch (\Throwable $th) {
             Log::debug('error send qty', ['data' => $th]);
@@ -332,12 +349,40 @@ class TelegramService {
             return $this->send_failed_to_process_message($payload);
         }
     }
+
+    /**
+     * Function to retrieve qty waste,
+     * Send the finish message to convo,
+     * And end the session of convo
+     * 
+     * @param array payload
+     * @param int next_step
+     * @param string msg
+     * 
+     * @return void
+     */
+    public function send_will_finish_chat($payload, $next_step, $msg)
+    {
+        $str = explode('kg', $msg);
+        if (count($str) != 2) {
+            return $this->send_format_failed($payload);
+        }
+
+        $waste_log_id = Redis::get('waste_log_id');
+        Log::debug('waste_log_id', $waste_log_id);
+    }
     /******************************************************************************** END WASTE CHAT SECTION */
     
 
     public function send_failed_to_process_message($payload)
     {
         $payload['text'] = 'Mohon maaf terjadi gangguan server, mohon hubungi penanggung jawab untuk menyelesaikan ini';
+        Http::post($this->url(), $payload);
+    }
+
+    public function send_format_failed($payload)
+    {
+        $payload['text'] = 'Format yang kamu masukan tidak sesuai';
         Http::post($this->url(), $payload);
     }
 }
