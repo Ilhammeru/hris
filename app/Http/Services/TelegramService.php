@@ -294,8 +294,11 @@ class TelegramService {
      */
     public function send_will_send_qty_chat($payload, $next_step, $msg)
     {
-        $str = explode('Detail Limbah ', $msg);
-        $str_user = explode('=', $str[1]);
+        $s = str_replace('Detail =', 'd-', $msg);
+        $s = str_replace('Jenis Limbah =', 'd-', $s);
+        $s = str_replace('Sifat Limbah =', 'd-', $s);
+        $s = str_replace('Sumber Limbah =', 'd-', $s);
+        $str_user = explode('d-', $s);
         Log::debug('msg detail', ['data' => $str_user]);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
