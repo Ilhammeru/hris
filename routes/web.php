@@ -22,7 +22,6 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 // delete REDIS
 Route::get('/delete-redis/{key}', function($key) {
-    $key = implode(' ', explode('_', $key));
     Redis::del($key);
 });
 
