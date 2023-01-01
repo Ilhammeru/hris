@@ -23,6 +23,7 @@ class TelegramController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         try {
+
             $is_finish = false;
             $is_amount = false;
             $is_type = false;
@@ -44,6 +45,7 @@ class TelegramController extends Controller
             }
 
             $current_chat = session('current_chat');
+            $current_chat_theme = session('current_chat_theme');
 
             $res_message = [
                 'chat_id' => $room_id,
@@ -53,27 +55,43 @@ class TelegramController extends Controller
             if (!empty($item['message'])) {
                 $chat_id = $item['message']['chat']['id'];
                 if (!empty($item['message']['text'])) {
+
                     $message = $item['message']['text'];
 
                     /**
                      * Start the chat with command /start
                      */
                     if ($message == '/start') {
+
                         $tele_service->start_chat($res_message);
+
                     }
+
                 }
             } else if (!empty($item['callback_query'])) {
+
                 $theme = $item['callback_query']['data'];
-                
+                if (!$current_chat_theme) {
+                    /**
+                     * Init the chat environment if user doesn't have current chat theme
+                     */
+                    $tele_service->init_chat_with_theme($theme, $res_message);
+                    exit;
+
+                }
+
             }
             
             return response()->json($content);
+
         } catch (\Throwable $th) {
+
             Log::error([
                 'line' => $th->getLine(),
                 'file' => $th->getFile(),
                 'message' => $th->getMessage()
             ]);
+
         }
     }
 

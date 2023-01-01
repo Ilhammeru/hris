@@ -2,18 +2,53 @@
 
 namespace App\Http\Services;
 
+use App\Models\TelegramUserChat;
+use App\Models\WasteCode;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+
+/**
+ * *Available session is describe bellow
+ * *current_chat_theme -> current selected theme
+ * *current_chat -> Current chat
+ * *current_waste_step -> Current waste theme step. This step define in waste_step() function
+ * 
+ */
 
 class TelegramService {
     const URL = 'https://api.telegram.org/bot';
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
+    const CHAT_THEME_WASTE = 'limbah_theme';
+    const CHAT_THEME_HRD = 'hrd_theme';
 
     public function url()
     {
         return self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
     }
 
+    public function serviceChat()
+    {
+        return new ChatService();
+    }
+
+    public function waste_steps()
+    {
+        return [
+            'init_chat_theme',
+            'waste_code_list_and_waste_action_option',
+            'waste_action'
+        ];
+    }
+
+    /**
+     * Function to start a conversation
+     * Usually user start with command '/start'
+     * 
+     * @param array payload
+     * 
+     * @return void
+     */
     public function start_chat($payload)
     {
         $payload['text'] = 'Hai, selamat datang di Layanan Digital MPS Brondong';
@@ -32,20 +67,111 @@ class TelegramService {
                         [
                             [
                                 'text' => 'Limbah',
-                                'callback_data' => 'limbah_theme'
+                                'callback_data' => self::CHAT_THEME_WASTE
                             ],
                             [
                                 'text' => 'HRD',
-                                'callback_data' => 'hrd_theme'
+                                'callback_data' => self::CHAT_THEME_HRD
                             ],
                         ]
                     ],
                     'resize_keyboard' => true
                 ];
                 Http::post($this->url(), $payload);
-                
+
             }
 
         }
     }
+
+    public function init_chat_with_theme($theme, $payload)
+    {
+        if ($theme == self::CHAT_THEME_WASTE) {
+            session('current_chat_theme', $theme);
+            TelegramUserChat::insert([
+                'room_id' => $payload['chat_id'],
+                'theme' => $theme,
+                'message' => 'init chat theme',
+                'supposed_to_send' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+            session('current_waste_step', 1);
+            $this->chat_waste_by_step(1, $payload);
+            
+        } else if ($theme == self::CHAT_THEME_HRD) {
+            $this->under_development_chat($payload);
+        }
+    }
+
+    /**
+     * Function to send information to user
+     * If requested theme is under development mode
+     * 
+     * @param array payload
+     * 
+     * @return void
+     */
+    public function under_development_chat($payload)
+    {
+        $payload['text'] = 'Mohon maaf layanan ini masih dalam tahap pengembangan, harap bersabar yaa :)';
+        Http::post($this->url(), $payload);
+    }
+
+    public function chat_waste_by_step($step, $payload)
+    {
+        $step = $this->waste_steps()[$step];
+        if ($step == 'waste_code_list_and_waste_action_option') {
+
+            $waste_code = WasteCode::all();
+            $payload['text'] = "Baik, aku akan membantumu untuk mengetahui lebih dalam tentang limbah. \n";
+            $payload['text'] .= "Berikut adalah list kode limbah yang ada di MPS Brondong \n";
+            foreach ($waste_code as $k => $c) {
+                $payload['text'] .= ($k + 1) . ". " . $c->code . " : " . $c->description . " \n";
+            }
+            $payload['text'] .= "Pilih salah satu tombol di bawah ya. \n";
+            Http::post($this->url(), $payload);
+
+            sleep(.5);
+
+            $payload['text'] = "Jika kamu ingin keluar dari tema limbah ini, kamu bisa tekan tombol 'keluar' \n";
+            $payload['reply_markup'] = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Input Limbah Datang',
+                            'callback_data' => 'input_limbah_datang'
+                        ]
+                    ],
+                    [
+                        [
+                            'text' => 'Input Limbah Keluar',
+                            'callback_data' => 'input_limbah_keluar'
+                        ]
+                    ],
+                    [
+                        [
+                            'text' => 'List Limbah',
+                            'callback_data' => 'list_limbah'
+                        ]
+                    ],
+                    [
+                        [
+                            'text' => 'keluar',
+                            'callback_data' => 'out_of_theme'
+                        ]
+                    ],
+                ],
+                'resize_keyboard' => true
+            ];
+            Http::post($this->url(), $payload);
+            TelegramUserChat::where('room_id', $payload['chat_id'])
+                ->update([
+                    'supposed_to_send' => 2,
+                    'updated_at' => Carbon::now(),
+                    'message' => self::CHAT_THEME_WASTE
+                ]);
+        }
+    }
+    
 }
