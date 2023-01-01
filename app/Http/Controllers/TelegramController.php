@@ -85,6 +85,10 @@ class TelegramController extends Controller
 
                         $tele_service->start_chat($res_message);
 
+                    } else {
+
+                        $tele_service->send_format_failed($res_message);
+
                     }
 
                 }
