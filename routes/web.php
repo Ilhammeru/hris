@@ -24,6 +24,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/delete-redis/{key}', function($key) {
     Redis::del($key);
 });
+Route::get('flush-redis', function() {
+    Redis::flush();
+});
 
 Route::get('/user', function() {
     $pageTitle = "Template User";
