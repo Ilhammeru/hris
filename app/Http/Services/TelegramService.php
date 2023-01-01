@@ -202,6 +202,10 @@ class TelegramService {
         if ($msg == 'out_of_theme') {
             $this->send_out_of_theme_notif($payload);
             return $this->flush_redis();
+        } else if ($msg == 'input_limbah_keluar') {
+            return $this->send_underdevelopment_chat($payload);
+        } else if ($msg == 'list_limbah') {
+            return $this->send_underdevelopment_chat($payload);
         }
 
         $posistion = array_search($last_step_action, array_keys($this->waste_list_action()));
