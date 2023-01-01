@@ -193,6 +193,15 @@ class TelegramService {
     {
         $this->sendAction($payload['chat_id']);
 
+        /**
+         * Handle out_of_theme convo
+         * If it happened, remove all session
+         */
+        if ($msg == 'out_of_theme') {
+            $this->send_out_of_theme_notif($payload);
+            return $this->flush_redis();
+        }
+
         $posistion = array_search($last_step_action, array_keys($this->waste_list_action()));
         $posistion_next = (int) $posistion + 1;
         if (isset($this->waste_list_action()[$posistion_next])) {
@@ -399,18 +408,31 @@ class TelegramService {
         $payload['text'] .= "Jenis Limbah: " . $w->waste_type . "\n";
         $payload['text'] .= "Sifat Limbah: " . $w->in->waste_properties . "\n";
         Http::post($this->url(), $payload);
+        return $this->flush_redis();
+    }
+    /******************************************************************************** END WASTE CHAT SECTION */
+    
+    public function flush_redis()
+    {
         Redis::del('user_chat_theme');
         Redis::del('last_step_action');
         Redis::del('user_theme_action');
         Redis::del('waste_log_id');
     }
-    /******************************************************************************** END WASTE CHAT SECTION */
-    
+
+    public function send_out_of_theme_notif($payload)
+    {
+        $payload['text'] = "Kamu sudah tidak memiliki tema yang aktif. \n";
+        $payload['text'] .= "Untuk memulai pembicaraan, ketik '/start' yaa";
+        Http::post($this->url(), $payload);
+    }
+
     public function get_result_data($waste_log_id)
     {
         $data = WasteLog::with(['in', 'code'])->find($waste_log_id);
         return $data;
     }
+
 
     public function send_failed_to_process_message($payload)
     {
