@@ -109,7 +109,6 @@ class TelegramService {
             ]);
             session('current_waste_step', 1);
             $this->chat_waste_by_step(1, $payload);
-            exit;
         } else if ($theme == self::CHAT_THEME_HRD) {
             $this->under_development_chat($payload);
         }
@@ -182,7 +181,6 @@ class TelegramService {
                     'updated_at' => Carbon::now(),
                     'message' => self::CHAT_THEME_WASTE
                 ]);
-            exit;
 
         } else if ($step == 'waste_action') {
 
@@ -218,7 +216,7 @@ class TelegramService {
     public function send_waste_code_list($payload)
     {
         $this->sendAction($payload['chat_id']);
-        
+
         $waste_code = WasteCode::all();
         $payload['text'] = "Silahkan pilih kode limbah dulu ya";
         $textMarkup = [];
