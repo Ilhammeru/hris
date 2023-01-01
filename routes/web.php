@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Modules\Employee\Http\Controllers\LeavePermissionController;
 
@@ -17,6 +19,12 @@ use Modules\Employee\Http\Controllers\LeavePermissionController;
 
 Route::get('/', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// delete REDIS
+Route::get('/delete-redis/{key}', function($key) {
+    $key = implode(' ', explode('_', $key));
+    Redis::del($key);
+});
 
 Route::get('/user', function() {
     $pageTitle = "Template User";
