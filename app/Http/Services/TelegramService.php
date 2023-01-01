@@ -274,6 +274,7 @@ class TelegramService {
             $payload['text'] .= "Sifat Limbah = \n";
             $payload['text'] .= "Sumber Limbah = \n";
             Http::post($this->url(), $payload);
+            Redis::set('waste_log_id', $model->id);
             return Redis::set('last_step_action', $next_step);
         } catch (\Throwable $th) {
             Log::debug('error send detail code', ['data' => $th]);
@@ -325,11 +326,10 @@ class TelegramService {
             $helper = $str_user[0];
             $exp_helper = explode('*', $helper);
             $waste_code = $exp_helper[1];
-            $waste_data = WasteCode::where('code', $waste_code)->first();
-            $waste_code_id = $waste_data->id;
     
+            $waste_log_id = Redis::get('waste_log_id');
     
-            $model = WasteLog::where('waste_code_id', $waste_code_id)->first();
+            $model = WasteLog::find($waste_log_id);
             $model->waste_type = $waste_type;
             $model->waste_detail = $waste_detail;
             
@@ -344,7 +344,6 @@ class TelegramService {
 
             $payload['text'] = 'Masukan berat limbah dalam satuan Kilogram';
             Http::post($this->url(), $payload);
-            Redis::set('waste_log_id', $model->id);
             return Redis::set('last_step_action', $next_step);
         } catch (\Throwable $th) {
             Log::debug('error send qty', ['data' => $th]);
