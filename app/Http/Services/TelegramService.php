@@ -197,6 +197,7 @@ class TelegramService {
         $posistion = (int) $posistion + 1;
         $function_name = 'send_' . $this->waste_list_action()[$posistion] . '_chat';
         Log::debug($function_name);
+        Log::debug('posistion', ['data' => $posistion]);
         $this->$function_name($payload, $posistion, $msg);
     }
 
@@ -207,7 +208,6 @@ class TelegramService {
      */
     public function send_will_choose_waste_code_chat($payload, $next_step, $msg)
     {
-        Log::debug('next_step', ['data' => $next_step]);
         $waste_code = WasteCode::all();
         $payload['text'] = "Silahkan pilih kode limbah dulu ya";
         $textMarkup = [];
