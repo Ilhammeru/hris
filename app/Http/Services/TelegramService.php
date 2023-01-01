@@ -196,8 +196,6 @@ class TelegramService {
         $posistion = array_search($last_step_action, $this->waste_list_action());
         $posistion = (int) $posistion + 1;
         $function_name = 'send_' . $this->waste_list_action()[$posistion] . '_chat';
-        Log::debug($function_name);
-        Log::debug('posistion', ['data' => $posistion]);
         $this->$function_name($payload, $posistion, $msg);
     }
 
