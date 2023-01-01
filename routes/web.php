@@ -25,7 +25,11 @@ Route::get('/delete-redis/{key}', function($key) {
     Redis::del($key);
 });
 Route::get('flush-redis', function() {
-    Redis::flush();
+    Redis::del('current_chat_theme');
+    Redis::del('current_chat');
+    Redis::del('current_waste_step');
+    Redis::del('unique_log_id');
+    Redis::del('current_inside_step');
 });
 
 Route::get('/user', function() {
