@@ -369,7 +369,7 @@ class TelegramService {
         }
 
         $waste_log_id = Redis::get('waste_log_id');
-        Log::debug('waste_log_id', $waste_log_id);
+        Log::debug('waste_log_id', ['data' => $waste_log_id]);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
