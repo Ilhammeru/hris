@@ -225,6 +225,7 @@ class TelegramService {
             $this->send_waste_code_list($payload);
         } else {
             $next_step = (int) $current_inside_step + 1;
+            Redis::set('next_step', ['data' => $next_step]);
             if ($inside_step[$next_step] == 'input_waste_detail') {
                 $this->send_waste_detail_data($payload);
                 
@@ -242,6 +243,7 @@ class TelegramService {
                 $model->exp = date('Y-m-d', strtotime('+90 day'));
                 $model->code_number = '';
                 $model->save();
+                Redis::set('model', ['data' => $model]);
                 Redis::set('unique_log_id', $unique_log_id);
             }
         }
