@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WasteLog extends Model
 {
@@ -14,8 +15,8 @@ class WasteLog extends Model
         'waste_type'
     ];
 
-    public function in():BelongsTo
+    public function in():HasOne
     {
-        return $this->belongsTo(WasteLogIn::class, 'waste_log_id');
+        return $this->hasOne(WasteLogIn::class, 'waste_log_id');
     }
 }
