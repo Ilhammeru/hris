@@ -295,7 +295,8 @@ class TelegramService {
     public function send_will_send_qty_chat($payload, $next_step, $msg)
     {
         $str = explode('Detail Limbah ', $msg);
-        Log::debug('msg detail', ['data' => $str]);
+        $str_user = explode('=', $str[1]);
+        Log::debug('msg detail', ['data' => $str_user]);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
