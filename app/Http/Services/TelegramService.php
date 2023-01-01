@@ -396,7 +396,8 @@ class TelegramService {
     
     public function get_result_data($waste_log_id)
     {
-        $data = WasteLog::find($waste_log_id);
+        $data = WasteLog::with('in')->find($waste_log_id);
+        return $data;
     }
 
     public function send_failed_to_process_message($payload)
