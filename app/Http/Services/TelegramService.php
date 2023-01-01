@@ -308,9 +308,10 @@ class TelegramService {
                 return $this->send_format_failed($payload);
             }
 
-            $waste_type = $str_user[1] ?? null;
-            $waste_properties = $str_user[2] ?? null;
-            $waste_source = $str_user[3] ?? null;
+            $waste_detail = $str_user[1] ?? null;
+            $waste_type = $str_user[2] ?? null;
+            $waste_properties = $str_user[3] ?? null;
+            $waste_source = $str_user[4] ?? null;
 
             if (
                 $waste_type == null ||
@@ -330,6 +331,7 @@ class TelegramService {
     
             $model = WasteLog::where('waste_code_id', $waste_code_id)->first();
             $model->waste_type = $waste_type;
+            $model->waste_detail = $waste_detail;
             
             if ($model->save()) {
                 $mod = WasteLogIn::where('waste_log_id', $model->id)->first();
