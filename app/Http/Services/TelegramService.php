@@ -107,7 +107,7 @@ class TelegramService {
          * Then send the rollback message
          */
         if ($msg == self::CHAT_THEME_HRD) {
-            return $this->send_underdevelopment_chat($payload);
+            return $this->send_underdevelopment_chat($payload, 'HRD');
         }
 
         if ($msg == self::CHAT_THEME_WASTE) {
@@ -125,9 +125,9 @@ class TelegramService {
      * 
      * @return void
      */
-    public function send_underdevelopment_chat($payload)
+    public function send_underdevelopment_chat($payload, $text = 'Menu ini')
     {
-        $payload['text'] = 'Maaf yaa, untuk HRD masih dalam pengembangan, harap bersabar :)';
+        $payload['text'] = 'Maaf yaa, untuk '. $text .' masih dalam pengembangan, harap bersabar :)';
         Http::post($this->url(), $payload);
     }
 
@@ -203,9 +203,9 @@ class TelegramService {
             $this->send_out_of_theme_notif($payload);
             return $this->flush_redis();
         } else if ($msg == 'input_limbah_keluar') {
-            return $this->send_underdevelopment_chat($payload);
+            return $this->send_underdevelopment_chat($payload, 'Limbah Keluar');
         } else if ($msg == 'list_limbah') {
-            return $this->send_underdevelopment_chat($payload);
+            return $this->send_underdevelopment_chat($payload, 'List Limbah');
         }
 
         $posistion = array_search($last_step_action, array_keys($this->waste_list_action()));
