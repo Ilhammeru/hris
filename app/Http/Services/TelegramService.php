@@ -294,19 +294,43 @@ class TelegramService {
      */
     public function send_will_send_qty_chat($payload, $next_step, $msg)
     {
-        $s = str_replace('Detail =', 'd-', $msg);
-        $s = str_replace('Jenis Limbah =', 'd-', $s);
-        $s = str_replace('Sifat Limbah =', 'd-', $s);
-        $s = str_replace('Sumber Limbah =', 'd-', $s);
-        $str_user = explode('d-', $s);
-        $waste_type = $str_user[1];
-        $waste_properties = $str_user[2];
-        $waste_source = $str_user[3];
-        $helper = $str_user[0];
-        $exp_helper = explode('*', $helper);
-        $waste_code = $exp_helper[1];
-        Log::debug($waste_code);
+        DB::beginTransaction();
+        try {
+            $s = str_replace('Detail =', 'd-', $msg);
+            $s = str_replace('Jenis Limbah =', 'd-', $s);
+            $s = str_replace('Sifat Limbah =', 'd-', $s);
+            $s = str_replace('Sumber Limbah =', 'd-', $s);
+            $str_user = explode('d-', $s);
+            $waste_type = $str_user[1];
+            $waste_properties = $str_user[2];
+            $waste_source = $str_user[3];
+            $helper = $str_user[0];
+            $exp_helper = explode('*', $helper);
+            $waste_code = $exp_helper[1];
+            $waste_data = WasteCode::where('code', $waste_code)->first();
+            $waste_code_id = $waste_data->id;
+    
+    
+            $model = WasteLog::where('waste_code_id', $waste_code_id)->first();
+            $model->waste_type = $waste_type;
+            
+            if ($model->save()) {
+                $mod = WasteLogIn::where('waste_log_id', $model->id)->first();
+                $mod->waste_source = $waste_source;
+                $mod->waste_properties = $waste_properties;
+                $mod->save();
+            }
+            
+            DB::commit();
 
+            $payload['text'] = 'Masukan berat limbah dalam satuan Kilogram';
+            Http::post($this->url(), $payload);
+            return Redis::set('last_step_action', $next_step);
+        } catch (\Throwable $th) {
+            Log::debug('error send qty', ['data' => $th]);
+            DB::rollBack();
+            return $this->send_failed_to_process_message($payload);
+        }
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
