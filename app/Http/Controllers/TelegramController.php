@@ -50,6 +50,7 @@ class TelegramController extends Controller
             $current_chat = session('current_chat');
             $current_chat_theme = session('current_chat_theme');
             $current_step = session('current_waste_step');
+            Log::debug('current_chat_theme', ['data' => $current_chat_theme]);
 
             $res_message = [
                 'chat_id' => $room_id,
