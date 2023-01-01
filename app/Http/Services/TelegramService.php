@@ -369,10 +369,35 @@ class TelegramService {
         }
 
         $waste_log_id = Redis::get('waste_log_id');
-        Log::debug('waste_log_id', ['data' => $waste_log_id]);
+        if (!$waste_log_id) {
+            Log::error("err get waste log id", ['data' => $waste_log_id]);
+            return $this->send_failed_to_process_message($payload);
+        }
+
+        $w = $this->get_result_data($waste_log_id);
+        Log::debug('result', ['data' => $w]);
+        return;
+
+        $model = WasteLogIn::where('waste_log_id', $waste_log_id)->first();
+        $model->qty = $str[0];
+        $model->save();
+
+        $payload['text'] = "Baik, terima kasih. Data yang kamu input sudah tersimpan di Digital LogBook Limbah B3. \n";
+        $payload['text'] .= "Kamu bisa melihat list laporan terbaru yang sudah diinput dengan klik tombol 'List Limbah' saat kamu memilih layanan Limbah ya. \n";
+        Http::post($this->url(), $payload);
+
+        $payload['text'] = 'Senang bisa membantumu :) semoga harimu menyenangkan.';
+        Http::post($this->url(), $payload);
+
+        $payload['text'] = "Satu Tekad Satu Semangat dan Satu Tujuan Kita Pasti Bisa";
+        Http::post($this->url(), $payload);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
+    public function get_result_data($waste_log_id)
+    {
+        $data = WasteLog::find($waste_log_id);
+    }
 
     public function send_failed_to_process_message($payload)
     {
