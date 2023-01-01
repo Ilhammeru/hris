@@ -21,7 +21,7 @@ class TelegramController extends Controller
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
 
-    public function webhook(Request $request): JsonResponse
+    public function webhook(Request $request)
     {
         try {
 
