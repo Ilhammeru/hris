@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Menu;
+use App\Models\WasteLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
@@ -331,5 +332,16 @@ if (!function_exists('set_action_table')) {
 
         $meta = $edit . $delete . $to_permanent;
         return $meta;
+    }
+}
+
+if (!function_exists('generate_waste_code_number')) {
+    function generate_waste_code_number($waste_code, $waste_code_id)
+    {
+        $current_data_by_code = WasteLog::where('waste_code_id', $waste_code_id)->count();
+        $current_all_data = WasteLog::count();
+
+        $code = $waste_code . '/' . $current_data_by_code . '/' . $current_all_data;
+        return $code;
     }
 }

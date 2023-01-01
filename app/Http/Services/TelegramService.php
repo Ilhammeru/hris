@@ -4,8 +4,10 @@ namespace App\Http\Services;
 
 use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
+use App\Models\WasteLog;
 use App\Models\WasteLogIn;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
@@ -194,7 +196,7 @@ class TelegramService {
         $posistion = array_search($last_step_action, $this->waste_list_action());
         $posistion = (int) $posistion + 1;
         $function_name = 'send_' . $this->waste_list_action()[$posistion] . '_chat';
-        $this->$function_name($payload, $posistion);
+        $this->$function_name($payload, $posistion, $msg);
     }
 
     /**
@@ -202,7 +204,7 @@ class TelegramService {
      * The purpose is user will be select on of them
      * and Process it!
      */
-    public function send_will_choose_waste_code_chat($payload, $next_step)
+    public function send_will_choose_waste_code_chat($payload, $next_step, $msg)
     {
         $waste_code = WasteCode::all();
         $payload['text'] = "Silahkan pilih kode limbah dulu ya";
@@ -220,8 +222,66 @@ class TelegramService {
             'resize_keyboard' => true
         ];
         Http::post($this->url(), $payload);
-        Redis::set('last_step_action', $next_step);
+        return Redis::set('last_step_action', $next_step);
+    }
+
+    /**
+     * Function to send instruction chat to user to input the detail of waste
+     * In this function will retrieve 'waste_code' that has been choose by user (by reply current message)
+     * 
+     * @param array payload
+     * @param int next_step
+     * @param string msg : This is the waste code send by user
+     * 
+     * @return void
+     */
+    public function send_will_send_detail_waste_chat($payload, $next_step, $msg)
+    {
+        DB::beginTransaction();
+        try {
+            $exp_code = explode('@type-', $msg);
+            $waste_code = $exp_code[0];
+    
+            $waste_code_id = WasteCode::where('code', $waste_code)->first();
+            $waste_code_id = $waste_code_id->id;
+    
+            $model = new WasteLog();
+            $model->waste_code_id = $waste_code_id;
+            $model->waste_type = 'not-filled-yet';
+            
+            if ($model->save()) {
+                $mod = new WasteLogIn();
+                $mod->waste_log_id = $model->id;
+                $mod->code_number = generate_waste_code_number($waste_code, $waste_code_id);
+                $mod->save();
+            }
+            
+            DB::commit();
+            
+            $payload['text'] = 'Silahkan ketik 1 detail limbah yang akan masuk.';
+            Http::post($this->url(), $payload);
+
+            $payload['text'] = 'Tolong ketik dengan format seperti di chat selanjutnya ya, atau kamu bisa copy paste pesan tersebut';
+            Http::post($this->url(), $payload);
+
+            $payload['text'] = "Detail Limbah \n";
+            $payload['text'] .= "Detail = <detail limbah ketik disini ya> \n";
+            $payload['text'] .= "Jenis Limbah = <jenis limbah ketik disini ya> \n";
+            $payload['text'] .= "Sifat Limbah = <sifat limbah ketik disini ya> \n";
+            Http::post($this->url(), $payload);
+            return Redis::set('last_step_action', $next_step);
+        } catch (\Throwable $th) {
+            Log::debug('error send detail code', ['data' => $th]);
+            DB::rollBack();
+            return $this->send_failed_to_process_message($payload);
+        }
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
+
+    public function send_failed_to_process_message($payload)
+    {
+        $payload['text'] = 'Mohon maaf terjadi gangguan server, mohon hubungi penanggung jawab untuk menyelesaikan ini';
+        Http::post($this->url(), $payload);
+    }
 }
