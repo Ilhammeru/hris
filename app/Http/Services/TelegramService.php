@@ -7,6 +7,7 @@ use App\Models\WasteCode;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * *Available session is describe bellow
@@ -99,8 +100,7 @@ class TelegramService {
     public function init_chat_with_theme($theme, $payload)
     {
         if ($theme == self::CHAT_THEME_WASTE) {
-            $sess = session(['current_chat_theme' => $theme]);
-            Log::debug('sess', ['sess' => $sess]);
+            Redis::set('current_chat_theme', $theme);
             TelegramUserChat::insert([
                 'room_id' => $payload['chat_id'],
                 'theme' => $theme,
@@ -109,7 +109,7 @@ class TelegramService {
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]);
-            session(['current_waste_step' => 1]);
+            Redis::set('current_waste_step', 1);
             $this->chat_waste_by_step(1, $payload);
         } else if ($theme == self::CHAT_THEME_HRD) {
             $this->under_development_chat($payload);
@@ -233,6 +233,7 @@ class TelegramService {
             'resize_keyboard' => true
         ];
         Http::post($this->url(), $payload);
+        Redis::set('current_inside_step', 'choose_waste_code');
     }
     
 }

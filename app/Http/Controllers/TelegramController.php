@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Modules\Employee\Http\Services\LeavePermissionService;
 use Telegram\Bot\Api;
 
@@ -47,9 +48,9 @@ class TelegramController extends Controller
                 $msg = $item['message']['text'];
             }
 
-            $current_chat = session('current_chat');
-            $current_chat_theme = session('current_chat_theme');
-            $current_step = session('current_waste_step');
+            $current_chat = Redis::get('current_chat');
+            $current_chat_theme = Redis::get('current_chat_theme');
+            $current_step = Redis::get('current_waste_step');
             Log::debug('current_chat_theme', ['data' => $current_chat_theme]);
             Log::debug('current_step', ['data' => $current_step]);
 
