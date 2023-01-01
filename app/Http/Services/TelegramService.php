@@ -301,6 +301,7 @@ class TelegramService {
             $s = str_replace('Sifat Limbah =', 'd-', $s);
             $s = str_replace('Sumber Limbah =', 'd-', $s);
             $str_user = explode('d-', $s);
+            Log::debug('str_user', ['data' => $str_user]);
 
             if (count($str_user) < 4) {
                 DB::rollBack();
@@ -374,13 +375,11 @@ class TelegramService {
             return $this->send_failed_to_process_message($payload);
         }
 
-        $w = $this->get_result_data($waste_log_id);
-        Log::debug('result', ['data' => $w]);
-        return;
-
         $model = WasteLogIn::where('waste_log_id', $waste_log_id)->first();
         $model->qty = $str[0];
         $model->save();
+
+        $w = $this->get_result_data($waste_log_id);
 
         $payload['text'] = "Baik, terima kasih. Data yang kamu input sudah tersimpan di Digital LogBook Limbah B3. \n";
         $payload['text'] .= "Kamu bisa melihat list laporan terbaru yang sudah diinput dengan klik tombol 'List Limbah' saat kamu memilih layanan Limbah ya. \n";
@@ -391,12 +390,24 @@ class TelegramService {
 
         $payload['text'] = "Satu Tekad Satu Semangat dan Satu Tujuan Kita Pasti Bisa";
         Http::post($this->url(), $payload);
+        
+        $payload['text'] = "Berikut hasil dari inputan kamu: \n";
+        $payload['text'] .= "Nomor Registrasi: " . $w->in->code_number . "\n";
+        $payload['text'] .= "Kode Limbah: " . $w->code->code . "\n";
+        $payload['text'] .= "Detail Limbah: " . $w->waste_type . "\n";
+        $payload['text'] .= "Jenis Limbah: " . $w->in->waste_properties . "\n";
+        // $payload['text'] .= "Sifat Limbah: " . $w->code->code . "\n";
+        Http::post($this->url(), $payload);
+        Redis::del('user_chat_theme');
+        Redis::del('last_step_action');
+        Redis::del('user_theme_action');
+        Redis::del('waste_log_id');
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
     public function get_result_data($waste_log_id)
     {
-        $data = WasteLog::with('in')->find($waste_log_id);
+        $data = WasteLog::with(['in', 'code'])->find($waste_log_id);
         return $data;
     }
 

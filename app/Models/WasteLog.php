@@ -19,4 +19,9 @@ class WasteLog extends Model
     {
         return $this->hasOne(WasteLogIn::class, 'waste_log_id');
     }
+
+    public function code():HasOne
+    {
+        return $this->hasOne(WasteCode::class, 'waste_code_id');
+    }
 }
