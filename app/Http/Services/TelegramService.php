@@ -224,7 +224,7 @@ class TelegramService {
             // send first step of this waste theme
             $this->send_waste_code_list($payload);
         } else {
-            $next_step = $current_inside_step + 1;
+            $next_step = (int) $current_inside_step + 1;
             if ($inside_step[$next_step] == 'input_waste_detail') {
                 $this->send_waste_detail_data($payload);
                 
