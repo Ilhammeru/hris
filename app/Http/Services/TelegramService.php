@@ -467,6 +467,13 @@ class TelegramService {
         $data = $this->get_result_by_period($msg);
 
         Log::debug('period', ['data' => $data]);
+
+        foreach ($data as $d) {
+            $payload['text'] .= "Nomor Register: $d->in->cod_number \n";
+            $payload['text'] .= "Kode Limbah: $d->code->code \n";
+        }
+
+        Log::debug('period', ['data' => $payload]);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
@@ -494,6 +501,7 @@ class TelegramService {
     public function get_result_by_period($period)
     {
         $q = WasteLog::query();
+        $q->with('code');
         if ($period == 'last_record') {
             $q->with('in')
                 ->orderBy('id', 'desc')
