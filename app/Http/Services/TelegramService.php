@@ -466,8 +466,6 @@ class TelegramService {
     {
         $data = $this->get_result_by_period($msg);
 
-        Log::debug('period', ['data' => $data]);
-
         foreach ($data as $k => $d) {
             $code_number = $d->code->code_number;
             $code = $d->code->code;
@@ -489,8 +487,6 @@ class TelegramService {
             }
         }
 
-        
-        Log::debug('payload', ['data' => $payload]);
         Http::post($this->url(), $payload);
         return $this->flush_redis();
     }
