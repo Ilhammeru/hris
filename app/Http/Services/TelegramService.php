@@ -136,11 +136,14 @@ class TelegramService {
     public function waste_list_action()
     {
         return [
-            'will_choose_action_theme',
-            'will_choose_waste_code',
-            'will_send_detail_waste',
-            'will_send_qty',
-            'will_finish'
+            'will_choose_action_theme', // for insert new record for incoming waste
+            'will_choose_waste_code', // for insert new record for incoming waste
+            'will_send_detail_waste', // for insert new record for incoming waste
+            'will_send_qty', // for insert new record for incoming waste
+            'will_finish', // for insert new record for incoming waste
+            
+            'will_send_period_time', // for waste list command
+            'will_send_result_of_period' // for waste list command
         ];
     }
 
@@ -205,7 +208,12 @@ class TelegramService {
         } else if ($msg == 'input_limbah_keluar') {
             return $this->send_underdevelopment_chat($payload, 'Limbah Keluar');
         } else if ($msg == 'list_limbah') {
-            return $this->send_underdevelopment_chat($payload, 'List Limbah');
+            // return $this->send_underdevelopment_chat($payload, 'List Limbah');
+            /**
+             * Take over the last step action session
+             * 
+             */
+            $last_step_action = 4;
         }
 
         $posistion = array_search($last_step_action, array_keys($this->waste_list_action()));
@@ -415,6 +423,43 @@ class TelegramService {
         $payload['text'] .= "Sifat Limbah: " . $w->in->waste_properties . "\n";
         Http::post($this->url(), $payload);
         return $this->flush_redis();
+    }
+
+    /**
+     * Function to send the confirmation period list to show the all waste
+     * 
+     * @param array payload
+     * @param int next_step
+     * @param string msg
+     * 
+     * @return void
+     */
+    public function send_will_send_period_time_chat($payload, $next_step, $msg)
+    {
+        $payload['text'] = "Pilih periode waktu yang kamu inginkan";
+        $payload['reply_markup'] = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => 'List Input Terakhir',
+                        'callback_data' => 'last_record'
+                    ],
+                    [
+                        'text' => '1 Minggu Terakhir',
+                        'callback_data' => 'this_week'
+                    ],
+                ],
+                [
+                    [
+                        'text' => 'Semua Record',
+                        'callback_data' => 'all_record'
+                    ],
+                ],
+            ],
+            'resize_keyboard' => true
+        ];
+        Http::post($this->url(), $payload);
+        Redis::set('last_step_action', $next_step);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
