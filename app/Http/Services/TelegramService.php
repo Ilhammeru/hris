@@ -498,14 +498,15 @@ class TelegramService {
             $q->with('in')
                 ->orderBy('id', 'desc')
                 ->limit(1);
-        }
-        if ($period == 'this_week') {
+        } else if ($period == 'this_week') {
             $start = date('Y-m-d');
             $end = date('Y-m-d', strtotime('-7 day'));
             $time = [$start, $end];
             $q->with('in', function($query) use($time) {
                 $query->whereBetween('date', $time);
             });
+        } else {
+            $q->with('in');
         }
         $data = $q->get();
 
