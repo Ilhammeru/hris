@@ -495,15 +495,16 @@ class TelegramService {
     {
         $q = WasteLog::query();
         if ($period == 'last_record') {
-            $q->orderBy('id', 'desc')
+            $q->with('in')
+                ->orderBy('id', 'desc')
                 ->limit(1);
         }
         if ($period == 'this_week') {
             $start = date('Y-m-d');
             $end = date('Y-m-d', strtotime('-7 day'));
             $time = [$start, $end];
-            $q->with('in', function($q) use($time) {
-                $q->whereBetween('date', $time);
+            $q->with('in', function($query) use($time) {
+                $query->whereBetween('date', $time);
             });
         }
         $data = $q->get();
