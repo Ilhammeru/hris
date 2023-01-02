@@ -501,7 +501,7 @@ class TelegramService {
         } else if ($period == 'this_week') {
             $start = date('Y-m-d 00:00:00');
             $end = date('Y-m-d 00:00:00', strtotime('-7 day'));
-            $time = [$start, $end];
+            $time = [$end, $start];
             $q->with('in', function($query) use($time) {
                 $query->whereBetween('date', $time);
             });
