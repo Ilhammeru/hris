@@ -499,11 +499,11 @@ class TelegramService {
                 ->orderBy('id', 'desc')
                 ->limit(1);
         } else if ($period == 'this_week') {
-            $start = date('Y-m-d');
-            $end = date('Y-m-d', strtotime('-7 day'));
+            $start = date('Y-m-d 00:00:00');
+            $end = date('Y-m-d 00:00:00', strtotime('-7 day'));
             $time = [$start, $end];
             $q->with('in', function($query) use($time) {
-                return $query->whereBetween('date', $time);
+                $query->whereBetween('date', $time);
             });
         } else {
             $q->with('in');
