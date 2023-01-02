@@ -461,6 +461,13 @@ class TelegramService {
         Http::post($this->url(), $payload);
         Redis::set('last_step_action', $next_step);
     }
+
+    public function send_will_send_result_of_period_chat($payload, $next_step, $msg)
+    {
+        $data = $this->get_result_by_period($msg);
+
+        Log::debug('period', ['data' => $data]);
+    }
     /******************************************************************************** END WASTE CHAT SECTION */
     
     public function flush_redis()
@@ -481,6 +488,26 @@ class TelegramService {
     public function get_result_data($waste_log_id)
     {
         $data = WasteLog::with(['in', 'code'])->find($waste_log_id);
+        return $data;
+    }
+
+    public function get_result_by_period($period)
+    {
+        $q = WasteLog::query();
+        if ($period == 'last_record') {
+            $q->orderBy('id', 'desc')
+                ->limit(1);
+        }
+        if ($period == 'this_week') {
+            $start = date('Y-m-d');
+            $end = date('Y-m-d', strtotime('-7 day'));
+            $time = [$start, $end];
+            $q->with('in', function($q) use($time) {
+                $q->whereBetween('date', $time);
+            });
+        }
+        $data = $q->get();
+
         return $data;
     }
 
