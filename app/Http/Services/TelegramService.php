@@ -467,7 +467,7 @@ class TelegramService {
         $data = $this->get_result_by_period($msg);
 
         foreach ($data as $k => $d) {
-            $code_number = $d->code->code_number;
+            $code_number = $d->in->code_number;
             $code = $d->code->code;
             $prop = $d->in->waste_properties;
             $source = $d->in->waste_source;
