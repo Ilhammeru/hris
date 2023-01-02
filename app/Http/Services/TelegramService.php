@@ -503,7 +503,7 @@ class TelegramService {
             $end = date('Y-m-d', strtotime('-7 day'));
             $time = [$start, $end];
             $q->with('in', function($query) use($time) {
-                $query->whereBetween('date', $time);
+                return $query->whereBetween('date', $time);
             });
         } else {
             $q->with('in');
