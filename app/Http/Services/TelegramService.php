@@ -114,7 +114,7 @@ class TelegramService {
             $this->send_init_waste_chat($payload);
             Redis::set('user_chat_theme', self::CHAT_THEME_WASTE);
         } else {
-            $this->send_underdevelopment_chat($payload);
+            $this->send_format_failed($payload);
         }
     }
 
