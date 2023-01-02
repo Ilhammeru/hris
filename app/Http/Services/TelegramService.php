@@ -468,12 +468,26 @@ class TelegramService {
 
         Log::debug('period', ['data' => $data]);
 
-        foreach ($data as $d) {
+        foreach ($data as $k => $d) {
             $payload['text'] .= "Nomor Register: $d->in->cod_number \n";
             $payload['text'] .= "Kode Limbah: $d->code->code \n";
+            $payload['text'] .= "Detail Limbah: $d->waste_detail \n";
+            $payload['text'] .= "Jenis Limbah: $d->waste_type \n";
+            $payload['text'] .= "Sifat Limbah: $d->in->waste_properties \n";
+            $payload['text'] .= "Sumber Limbah: $d->in->waste_source \n";
+            $payload['text'] .= "Jumlah Limbah: $d->in->qty \n";
+            $payload['text'] .= "\n";
+            if (count($data) != 1) {
+                if (count($data) - 1 != $k) {
+                    $payload['text'] .= "######################## \n";
+                }
+            }
         }
 
-        Log::debug('period', ['data' => $payload]);
+        
+        Log::debug('payload', ['data' => $payload]);
+        Http::post($this->url(), $payload);
+        return $this->flush_redis();
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
