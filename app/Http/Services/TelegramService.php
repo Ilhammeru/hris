@@ -480,7 +480,7 @@ class TelegramService {
             $payload['text'] .= "Jenis Limbah: $d->waste_type\n";
             $payload['text'] .= "Sifat Limbah: $prop\n";
             $payload['text'] .= "Sumber Limbah: $source\n";
-            $payload['text'] .= "Jumlah Limbah: $qty\n";
+            $payload['text'] .= "Jumlah Limbah: $qty kg\n";
             $payload['text'] .= "\n";
             if (count($data) != 1) {
                 if (count($data) - 1 != $k) {
