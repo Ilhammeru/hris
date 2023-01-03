@@ -58,7 +58,8 @@
             longitude: item.coords.longitude
             };
         });
-
+        console.log('dataGeolocation',dataGeolocation);
+        saveGeolat(dataGeolocation);
         
         }
 
