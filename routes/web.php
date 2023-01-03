@@ -67,5 +67,5 @@ Route::get('/password-request', function() {
 Route::get('/print/leave-permission', [LeavePermissionController::class, 'print'])->name('print.leave-permission');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/user-location', [GeneralController::class, 'save_location'])->name("user-location");
+    Route::post('/user-location', [GeneralController::class, 'save_location'])->name("user-location");
 });
