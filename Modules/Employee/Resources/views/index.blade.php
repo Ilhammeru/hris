@@ -58,11 +58,8 @@
                 latitude: item.coords.latitude,
                 longitude: item.coords.longitude
                 };
+                saveGeolat({latitude: item.coords.latitude, longitude: item.coords.longitude});
             });
-            console.log('dataGeolocation',dataGeolocation);
-            if (dataGeolocation) {
-                saveGeolat(dataGeolocation);
-            }
         
         }
 
