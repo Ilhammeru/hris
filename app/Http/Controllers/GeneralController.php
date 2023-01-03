@@ -23,7 +23,8 @@ class GeneralController extends Controller
     {
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-        $user_type = auth()->user()->user_type;
+        // $user_type = auth()->user()->user_type;
+        $user_type = 'C';
 
         $allowed_user = ['D', 'C', 'O'];
         if (in_array($user_type, $allowed_user)) {
