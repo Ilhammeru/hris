@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserGeolocation;
 use Illuminate\Http\Request;
 
 class GeneralController extends Controller
@@ -16,6 +17,31 @@ class GeneralController extends Controller
         $province = $request->province;
         $city = \Indonesia::findProvince($province, ['cities']);
         return response()->json(['data' => $city, 'message' => 'Success get city']);
+    }
+
+    public function save_location(Request $request)
+    {
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $user_type = auth()->user()->user_type;
+
+        $allowed_user = ['D', 'C', 'O'];
+        if (in_array($user_type, $allowed_user)) {
+            $details = [];
+            $model = UserGeolocation::where('user_id', auth()->user()->id)->first();
+            if (!$model) {
+                $model = new UserGeolocation();
+                $model->user_id = auth()->user()->id;
+                $model->user_type = $user_type;
+                $details = array_merge($details, [['latitude' => $latitude, 'longitude' => $longitude]]);
+                $model->detail_location = json_encode($details);
+            } else {
+                $details = json_decode($model->detail_location, true);
+                $details = array_merge($details, [['latitude' => $latitude, 'longitude' => $longitude]]);
+                $model->detail_location = json_encode($details);
+            }
+            $model->save();
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GeneralController;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
@@ -64,3 +65,7 @@ Route::get('/password-request', function() {
 
 // Print leave permission
 Route::get('/print/leave-permission', [LeavePermissionController::class, 'print'])->name('print.leave-permission');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/user-location', [GeneralController::class, 'save_location']);
+});

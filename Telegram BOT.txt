@@ -1,0 +1,15 @@
+List name of session in HRIS Bot (Telegram):
+
+1. user_chat_theme: User current chat theme (Limbah Or HRD)
+2. last_step_action: Action inside of selected action theme, basicly, this step action is generate after the theme action
+3. user_theme_action: Action inside of selected theme
+4. waste_log_id: current waste log id
+
+
+List of last_step_action:
+1. will_choose_action_theme
+2. INPUT LIMBAH MASUK
+	a. will_choose_waste_code
+	b. will_send_detail_waste
+	c. will_send_qty
+	d. will_finish
