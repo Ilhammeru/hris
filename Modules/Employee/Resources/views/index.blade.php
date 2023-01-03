@@ -53,13 +53,15 @@
 
         if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(item){
+            console.log('item',item)
             dataGeolocation = {
             latitude: item.coords.latitude,
             longitude: item.coords.longitude
             };
         });
-        console.log('dataGeolocation',dataGeolocation);
-        saveGeolat(dataGeolocation);
+        if (dataGeolocation) {
+            saveGeolat(dataGeolocation);
+        }
         
         }
 
