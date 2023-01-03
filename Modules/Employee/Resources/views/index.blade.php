@@ -48,5 +48,38 @@
         // $('#table-employee-list tbody').on('click', 'tr', function () {
         //     $(this).toggleClass('selected');
         // });
+
+        let dataGeolocation;
+
+        if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(item){
+            dataGeolocation = {
+            latitude: item.coords.latitude,
+            longitude: item.coords.longitude
+            };
+        });
+
+        
+        }
+
+        function saveGeolat(data) {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('user-location') }}",
+                data: {
+                    latitude: dataGeolocation.latitude,
+                    longitude: dataGeolocation.longitude
+                },
+                beforeSend: function() {
+                    
+                },
+                success: function(res) {
+                    console.log('res',res)
+                },
+                error: function(err) {
+                    console.error('err', err);
+                }
+            })
+        }
     </script>
 @endpush
