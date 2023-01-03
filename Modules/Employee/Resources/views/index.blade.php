@@ -52,16 +52,17 @@
         let dataGeolocation;
 
         if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(item){
-            console.log('item',item)
-            dataGeolocation = {
-            latitude: item.coords.latitude,
-            longitude: item.coords.longitude
-            };
-        });
-        if (dataGeolocation) {
-            saveGeolat(dataGeolocation);
-        }
+            navigator.geolocation.getCurrentPosition(function(item){
+                console.log('item',item)
+                dataGeolocation = {
+                latitude: item.coords.latitude,
+                longitude: item.coords.longitude
+                };
+            });
+            console.log('dataGeolocation',dataGeolocation);
+            if (dataGeolocation) {
+                saveGeolat(dataGeolocation);
+            }
         
         }
 
