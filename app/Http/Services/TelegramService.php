@@ -485,27 +485,6 @@ class TelegramService {
             'document' => $cFile
         ];
 
-        // foreach ($data as $k => $d) {
-        //     $code_number = $d->in->code_number;
-        //     $code = $d->code->code;
-        //     $prop = $d->in->waste_properties;
-        //     $source = $d->in->waste_source;
-        //     $qty = $d->in->qty;
-        //     $payload['text'] .= "Nomor Register: $code_number\n";
-        //     $payload['text'] .= "Kode Limbah: $code\n";
-        //     $payload['text'] .= "Detail Limbah: $d->waste_detail\n";
-        //     $payload['text'] .= "Jenis Limbah: $d->waste_type\n";
-        //     $payload['text'] .= "Sifat Limbah: $prop\n";
-        //     $payload['text'] .= "Sumber Limbah: $source\n";
-        //     $payload['text'] .= "Jumlah Limbah: $qty kg\n";
-        //     $payload['text'] .= "\n";
-        //     if (count($data) != 1) {
-        //         if (count($data) - 1 != $k) {
-        //             $payload['text'] .= "######################## \n";
-        //         }
-        //     }
-        // }
-
         Http::post($this->urlDocument($payload['chat_id']), $payload);
         Log::debug('urldocument', ['doc' => $this->urlDocument($payload['chat_id'])]);
         return $this->flush_redis();
@@ -598,6 +577,6 @@ class TelegramService {
         $file = 'result_'. date('YmdHis') .'.xlsx';
         $writer->save($file);
 
-        return $file;
+        return './' . $file;
     }
 }
