@@ -489,7 +489,8 @@ class TelegramService {
         Log::debug('urldocument', [
             'doc' => $this->urlDocument($payload['chat_id']),
             'send' => $send,
-            'payload' => $payload
+            'payload' => $payload,
+            'file' => $file
         ]);
         return $this->flush_redis();
     }
