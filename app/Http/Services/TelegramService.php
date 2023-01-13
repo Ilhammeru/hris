@@ -575,7 +575,7 @@ class TelegramService {
             $qty = $d->in->qty;
 
             $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
-            $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code_number . ' (' . $prop . ')');
+            $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code . ' (' . $prop . ')');
             $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
             $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $source);
             $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $qty);
