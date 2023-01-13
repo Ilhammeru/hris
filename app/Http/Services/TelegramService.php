@@ -476,24 +476,21 @@ class TelegramService {
         //* generate and save excel in local
         $file = $this->generate_report_as_excel($data);
 
-        //* send to chat as document
-        // Create CURLFile
-        $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file);
-        $cFile = new CURLFile($file, $finfo);
-        $payload['document'] = $cFile;
-        $send = [
-            'document' => $cFile
-        ];
+        if ($file != '') {
+            //* send to chat as document
+            // Create CURLFile
+            $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file);
+            $cFile = new CURLFile($file, $finfo);
+            $send = [
+                'document' => $cFile
+            ];
+    
+            $this->handle_send_document_request($this->urlDocument($payload['chat_id']), $send);
+        } else {
+            $payload['text'] = 'Belum ada data tersimpan untuk peride waktu yang anda pilih';
+            Http::post($this->url(), $payload);
+        }
 
-        $this->handle_send_document_request($this->urlDocument($payload['chat_id']), $send);
-
-        // Http::post($this->urlDocument($payload['chat_id']), $send);
-        Log::debug('urldocument', [
-            'doc' => $this->urlDocument($payload['chat_id']),
-            'send' => $send,
-            'payload' => $payload,
-            'file' => $file
-        ]);
         return $this->flush_redis();
     }
 
@@ -504,10 +501,6 @@ class TelegramService {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-
-        // Create CURLFile
-        // $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), self::DUMMY_FILE);
-        // $cFile = new CURLFile(self::DUMMY_FILE, $finfo);
 
         // Add CURLFile to CURL request
         curl_setopt($ch, CURLOPT_POSTFIELDS, $file);
@@ -585,33 +578,37 @@ class TelegramService {
         $spreadsheet = $reader->load("logbook.xlsx");
         $spreadsheet->getActiveSheet()->setCellValue('D7', '2023');
         
-        $start_row = 12;
-        foreach ($data as $key => $d) {
-            $code_number = $d->in->code_number;
-            $code = $d->code->code;
-            $prop = $d->in->waste_properties;
-            $source = $d->in->waste_source;
-            $qty = $d->in->qty;
-
-            $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
-            $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code . ' (' . $prop . ')');
-            $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
-            $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $source);
-            $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $qty);
-            $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
-            
-            $start_row++;
+        $fix_file = '';
+        if (count($data) > 0) {
+            $start_row = 12;
+            foreach ($data as $key => $d) {
+                $code_number = $d->in->code_number;
+                $code = $d->code->code;
+                $prop = $d->in->waste_properties;
+                $source = $d->in->waste_source;
+                $qty = $d->in->qty;
+    
+                $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
+                $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code . ' (' . $prop . ')');
+                $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
+                $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $source);
+                $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $qty);
+                $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
+                
+                $start_row++;
+            }
+    
+            $columns = ['B', 'C', 'D', 'E', 'F', 'G'];
+            for ($xy = 0; $xy < count($columns); $xy++) {
+                $spreadsheet->getActiveSheet()->getColumnDimension($columns[$xy])->setAutoSize(true);
+            }
+    
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+            $file = 'result.xlsx';
+            $writer->save($file);
+            $fix_file = './' . $file;
         }
-
-        $columns = ['B', 'C', 'D', 'E', 'F', 'G'];
-        for ($xy = 0; $xy < count($columns); $xy++) {
-            $spreadsheet->getActiveSheet()->getColumnDimension($columns[$xy])->setAutoSize(true);
-        }
-
-        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
-        $file = 'result.xlsx';
-        $writer->save($file);
-
-        return './' . $file;
+        
+        return $fix_file;
     }
 }
