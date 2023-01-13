@@ -22,7 +22,7 @@ class TelegramController extends Controller
     const URL = 'https://api.telegram.org/bot';
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
-    const DUMMY_FILE = './logbook.xlsx';
+    const DUMMY_FILE = './result_20230113214407.xlsx';
 
     public function webhook(Request $request)
     {
