@@ -26,12 +26,18 @@ class TelegramService {
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
     const SEND_ACTION = 'sendChatAction';
+    const SEND_DOCUMENT = 'sendDocument';
     const CHAT_THEME_WASTE = 'limbah_theme';
     const CHAT_THEME_HRD = 'hrd_theme';
 
     public function url()
     {
         return self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_MESSAGE;
+    }
+
+    public function urlDocument($chat_id)
+    {
+        return self::URL . env('TELEGRAM_BOT_TOKEN') . '/' . self::SEND_DOCUMENT . '?chat_id=' . $chat_id;
     }
 
     public function urlAction()
@@ -475,29 +481,32 @@ class TelegramService {
         $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file);
         $cFile = new CURLFile($file, $finfo);
         $payload['document'] = $cFile;
+        $send = [
+            'document' => $cFile
+        ];
 
-        foreach ($data as $k => $d) {
-            $code_number = $d->in->code_number;
-            $code = $d->code->code;
-            $prop = $d->in->waste_properties;
-            $source = $d->in->waste_source;
-            $qty = $d->in->qty;
-            $payload['text'] .= "Nomor Register: $code_number\n";
-            $payload['text'] .= "Kode Limbah: $code\n";
-            $payload['text'] .= "Detail Limbah: $d->waste_detail\n";
-            $payload['text'] .= "Jenis Limbah: $d->waste_type\n";
-            $payload['text'] .= "Sifat Limbah: $prop\n";
-            $payload['text'] .= "Sumber Limbah: $source\n";
-            $payload['text'] .= "Jumlah Limbah: $qty kg\n";
-            $payload['text'] .= "\n";
-            if (count($data) != 1) {
-                if (count($data) - 1 != $k) {
-                    $payload['text'] .= "######################## \n";
-                }
-            }
-        }
+        // foreach ($data as $k => $d) {
+        //     $code_number = $d->in->code_number;
+        //     $code = $d->code->code;
+        //     $prop = $d->in->waste_properties;
+        //     $source = $d->in->waste_source;
+        //     $qty = $d->in->qty;
+        //     $payload['text'] .= "Nomor Register: $code_number\n";
+        //     $payload['text'] .= "Kode Limbah: $code\n";
+        //     $payload['text'] .= "Detail Limbah: $d->waste_detail\n";
+        //     $payload['text'] .= "Jenis Limbah: $d->waste_type\n";
+        //     $payload['text'] .= "Sifat Limbah: $prop\n";
+        //     $payload['text'] .= "Sumber Limbah: $source\n";
+        //     $payload['text'] .= "Jumlah Limbah: $qty kg\n";
+        //     $payload['text'] .= "\n";
+        //     if (count($data) != 1) {
+        //         if (count($data) - 1 != $k) {
+        //             $payload['text'] .= "######################## \n";
+        //         }
+        //     }
+        // }
 
-        Http::post($this->url(), $payload);
+        Http::post($this->urlDocument($payload['chat_id']), $send);
         return $this->flush_redis();
     }
     /******************************************************************************** END WASTE CHAT SECTION */
