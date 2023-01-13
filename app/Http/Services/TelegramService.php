@@ -485,8 +485,12 @@ class TelegramService {
             'document' => $cFile
         ];
 
-        Http::post($this->urlDocument($payload['chat_id']), $payload);
-        Log::debug('urldocument', ['doc' => $this->urlDocument($payload['chat_id'])]);
+        Http::post($this->urlDocument($payload['chat_id']), $send);
+        Log::debug('urldocument', [
+            'doc' => $this->urlDocument($payload['chat_id']),
+            'send' => $send,
+            'payload' => $payload
+        ]);
         return $this->flush_redis();
     }
     /******************************************************************************** END WASTE CHAT SECTION */

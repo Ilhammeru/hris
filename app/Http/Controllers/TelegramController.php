@@ -102,7 +102,9 @@ class TelegramController extends Controller
 
                         // Add CURLFile to CURL request
                         curl_setopt($ch, CURLOPT_POSTFIELDS, [
-                            "document" => $cFile
+                            "document" => $cFile,
+                            'text' => 'oke',
+                            'chat_id' => $room_id
                         ]);
 
                         // Call
