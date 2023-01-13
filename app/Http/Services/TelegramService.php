@@ -472,7 +472,7 @@ class TelegramService {
     public function send_will_send_result_of_period_chat($payload, $next_step, $msg)
     {
         $data = $this->get_result_by_period($msg);
-
+        Log::debug('data file', ['data' => $data]);
         //* generate and save excel in local
         $file = $this->generate_report_as_excel($data);
 
