@@ -609,7 +609,7 @@ class TelegramService {
         }
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
-        $file = 'result_'. date('YmdHis') .'.xlsx';
+        $file = 'result.xlsx';
         $writer->save($file);
 
         return './' . $file;
