@@ -92,7 +92,7 @@ class TelegramController extends Controller
 
                         // Send dummy file
                         $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_URL, "https://api.telegram.org/bot". env('TELEGRAM_BOT_TOKEN') ."/sendDocument?chat_id=" . $room_id);
+                        curl_setopt($ch, CURLOPT_URL, "https://api.telegram.org/bot5972664051:AAEgwN8hAMKh52r19KPUTeALp6kyHUVzorg/sendDocument?chat_id=1991941955");
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                         curl_setopt($ch, CURLOPT_POST, 1);
 
