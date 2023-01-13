@@ -406,8 +406,12 @@ class TelegramService {
             return $this->send_failed_to_process_message($payload);
         }
 
+        // get current total waste
+        $total_current_waste = $this->get_waste_total_qty();
+        $total = floatval($str[0]) + floatval($total_current_waste);
+
         $model = WasteLogIn::where('waste_log_id', $waste_log_id)->first();
-        $model->qty = $str[0];
+        $model->qty = $total;
         $model->save();
 
         $w = $this->get_result_data($waste_log_id);
@@ -471,8 +475,19 @@ class TelegramService {
 
     public function send_will_send_result_of_period_chat($payload, $next_step, $msg)
     {
+        // check data
+        if ($msg == 'this_week') {
+            $start = date('Y-m-d 00:00:00');
+            $end = date('Y-m-d 00:00:00', strtotime('-7 day'));
+            $time = [$end, $start];
+            $check = WasteLogIn::whereBetween('date', $time)->get();
+            if (count($check) == 0) {
+                goto send_empty_data;
+            }
+        }
+
         $data = $this->get_result_by_period($msg);
-        Log::debug('data file', ['data' => $data]);
+
         //* generate and save excel in local
         $file = $this->generate_report_as_excel($data);
 
@@ -487,6 +502,7 @@ class TelegramService {
     
             $this->handle_send_document_request($this->urlDocument($payload['chat_id']), $send);
         } else {
+            send_empty_data:
             $payload['text'] = 'Belum ada data tersimpan untuk peride waktu yang anda pilih';
             Http::post($this->url(), $payload);
         }
@@ -558,6 +574,12 @@ class TelegramService {
         return $data;
     }
 
+    public function get_waste_total_qty()
+    {
+        $data = WasteLog::select('id', 'total_qty')->get();
+        $total = collect($data)->sum('total_qty');
+        return $total;
+    }
 
     public function send_failed_to_process_message($payload)
     {
@@ -584,12 +606,13 @@ class TelegramService {
             foreach ($data as $key => $d) {
                 $code_number = $d->in->code_number;
                 $code = $d->code->code;
+                $detail = $d->waste_detail;
                 $prop = $d->in->waste_properties;
                 $source = $d->in->waste_source;
                 $qty = $d->in->qty;
     
                 $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
-                $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code . ' (' . $prop . ')');
+                $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code . ' (' . $detail . ')');
                 $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
                 $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $source);
                 $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $qty);

@@ -164,7 +164,9 @@ class TelegramController extends Controller
 
     public function generate_report()
     {
-        $data = WasteLog::with(['in', 'code'])->get();
+
+        $data = WasteLog::with(['code', 'in'])
+            ->get();
         $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
         $reader->setLoadSheetsOnly(["PRINT"]);
         $spreadsheet = $reader->load("logbook.xlsx");
