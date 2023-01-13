@@ -7,6 +7,7 @@ use App\Http\Services\TelegramService;
 use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
 use Carbon\Carbon;
+use CURLFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -20,6 +21,7 @@ class TelegramController extends Controller
     const URL = 'https://api.telegram.org/bot';
     const SEND_MESSAGE = 'sendMessage';
     const SET_COMMANDS = 'setMyCommands';
+    const DUMMY_FILE = './logbook.xlsx';
 
     public function webhook(Request $request)
     {
@@ -56,14 +58,14 @@ class TelegramController extends Controller
             ];
 
             /**
-             * If last_step_action and user_chat_theme session is defined,
-             * Then stop the login in here and
-             * RUN the conversation based on THEME and STEP
+             ** If last_step_action and user_chat_theme session is defined,
+             ** Then stop the logic in here and
+             ** RUN the conversation based on THEME and STEP
              * 
-             * If user chat theme session already define, 
-             * The last step action session is already defined to
+             ** If user chat theme session already define, 
+             ** The last step action session is already defined to
              * 
-             * So Check the last step action position to decide for the next move
+             ** So Check the last step action position to decide for the next move
              */
             if ($last_step_action != null && $user_chat_theme != null) {
                 if ($user_chat_theme == $tele_service::CHAT_THEME_WASTE) {
@@ -79,11 +81,35 @@ class TelegramController extends Controller
                     $message = $item['message']['text'];
 
                     /**
-                     * Start the chat with command /start
+                     ** Start the chat with command /start
                      */
                     if ($message == '/start') {
 
                         $tele_service->start_chat($res_message);
+
+                    } else if ($message == '/senddocument') {
+
+                        // Send dummy file
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, "https://api.telegram.org/bot". env('TELEGRAM_BOT_TOKEN') ."/sendDocument?chat_id=" . $room_id);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        curl_setopt($ch, CURLOPT_POST, 1);
+
+                        // Create CURLFile
+                        $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), self::DUMMY_FILE);
+                        $cFile = new CURLFile(self::DUMMY_FILE, $finfo);
+
+                        // Add CURLFile to CURL request
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, [
+                            "document" => $cFile
+                        ]);
+
+                        // Call
+                        $result = curl_exec($ch);
+
+                        // Show result and close curl
+                        var_dump($result);
+                        curl_close($ch);
 
                     } else {
 
@@ -97,7 +123,7 @@ class TelegramController extends Controller
 
                 if (!$user_chat_theme) {
                     /**
-                     * Set user chat theme, sent by $item['callback_query']['data'] key
+                     ** Set user chat theme, sent by $item['callback_query']['data'] key
                      */
                     $tele_service->set_user_chat_theme_and_send_greeting_theme($res_message, $msg);
                 }
