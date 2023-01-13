@@ -6,6 +6,7 @@ use App\Http\Services\ChatService;
 use App\Http\Services\TelegramService;
 use App\Models\TelegramUserChat;
 use App\Models\WasteCode;
+use App\Models\WasteLog;
 use Carbon\Carbon;
 use CURLFile;
 use Illuminate\Http\JsonResponse;
@@ -157,5 +158,30 @@ class TelegramController extends Controller
             ->first();
 
         return $data;
+    }
+
+    public function generate_report()
+    {
+        $data = WasteLog::with(['in', 'code'])->get();
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader->setLoadSheetsOnly(["PRINT"]);
+        $spreadsheet = $reader->load("logbook.xlsx");
+        $spreadsheet->getActiveSheet()->setCellValue('D7', '2023');
+        
+        $start_row = 12;
+        foreach ($data as $key => $d) {
+            $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
+            $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $d->code->code . ' (' . $d->in->waste_properties . ')');
+            $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
+            $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $d->in->waste_source);
+            $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $d->in->qty);
+            $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
+            
+            $start_row++;
+        }
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        $writer->save("result.xlsx");
+        echo 'okeoke';
     }
 }

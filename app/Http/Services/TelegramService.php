@@ -7,6 +7,7 @@ use App\Models\WasteCode;
 use App\Models\WasteLog;
 use App\Models\WasteLogIn;
 use Carbon\Carbon;
+use CURLFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -210,7 +211,7 @@ class TelegramService {
         } else if ($msg == 'list_limbah') {
             // return $this->send_underdevelopment_chat($payload, 'List Limbah');
             /**
-             * Take over the last step action session
+             ** Take over the last step action session
              * 
              */
             $last_step_action = 4;
@@ -466,6 +467,15 @@ class TelegramService {
     {
         $data = $this->get_result_by_period($msg);
 
+        //* generate and save excel in local
+        $file = $this->generate_report_as_excel($data);
+
+        //* send to chat as document
+        // Create CURLFile
+        $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file);
+        $cFile = new CURLFile($file, $finfo);
+        $payload['document'] = $cFile;
+
         foreach ($data as $k => $d) {
             $code_number = $d->in->code_number;
             $code = $d->code->code;
@@ -547,5 +557,37 @@ class TelegramService {
     {
         $payload['text'] = 'Format yang kamu masukan tidak sesuai';
         Http::post($this->url(), $payload);
+    }
+
+    public function generate_report_as_excel($data)
+    {
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader->setLoadSheetsOnly(["PRINT"]);
+        $spreadsheet = $reader->load("logbook.xlsx");
+        $spreadsheet->getActiveSheet()->setCellValue('D7', '2023');
+        
+        $start_row = 12;
+        foreach ($data as $key => $d) {
+            $code_number = $d->in->code_number;
+            $code = $d->code->code;
+            $prop = $d->in->waste_properties;
+            $source = $d->in->waste_source;
+            $qty = $d->in->qty;
+
+            $spreadsheet->getActiveSheet()->setCellValue('B'."$start_row", ($key + 1));
+            $spreadsheet->getActiveSheet()->setCellValue('C'."$start_row", $code_number . ' (' . $prop . ')');
+            $spreadsheet->getActiveSheet()->setCellValue('D'."$start_row", date('d F Y', strtotime($d->in->date)));
+            $spreadsheet->getActiveSheet()->setCellValue('E'."$start_row", $source);
+            $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $qty);
+            $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
+            
+            $start_row++;
+        }
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        $file = 'result_'. date('YmdHis') .'.xlsx';
+        $writer->save($file);
+
+        return $file;
     }
 }

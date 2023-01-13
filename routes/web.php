@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\TelegramController;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,8 @@ Route::get('flush-redis', function() {
     Redis::del('last_step_action');
     Redis::del('user_theme_action');
 });
+
+Route::get('/generate-report', [TelegramController::class, 'generate_report']);
 
 Route::get('/user', function() {
     $pageTitle = "Template User";
