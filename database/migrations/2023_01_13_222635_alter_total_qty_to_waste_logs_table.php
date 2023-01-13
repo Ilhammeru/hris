@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('waste_logs', function (Blueprint $table) {
-            $table->float('total_qty')->default(0);
+            $table->double('total_qty')->default(0);
         });
     }
 
