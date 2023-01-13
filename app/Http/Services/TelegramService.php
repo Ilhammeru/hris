@@ -485,7 +485,9 @@ class TelegramService {
             'document' => $cFile
         ];
 
-        Http::post($this->urlDocument($payload['chat_id']), $send);
+        $this->handle_send_document_request($this->urlDocument($payload['chat_id']), $send);
+
+        // Http::post($this->urlDocument($payload['chat_id']), $send);
         Log::debug('urldocument', [
             'doc' => $this->urlDocument($payload['chat_id']),
             'send' => $send,
@@ -493,6 +495,29 @@ class TelegramService {
             'file' => $file
         ]);
         return $this->flush_redis();
+    }
+
+    public function handle_send_document_request($url, $file)
+    {
+        // Send dummy file
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        // Create CURLFile
+        // $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), self::DUMMY_FILE);
+        // $cFile = new CURLFile(self::DUMMY_FILE, $finfo);
+
+        // Add CURLFile to CURL request
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $file);
+
+        // Call
+        $result = curl_exec($ch);
+
+        // Show result and close curl
+        var_dump($result);
+        curl_close($ch);
     }
     /******************************************************************************** END WASTE CHAT SECTION */
     
@@ -576,6 +601,11 @@ class TelegramService {
             $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
             
             $start_row++;
+        }
+
+        $columns = ['B', 'C', 'D', 'E', 'F', 'G'];
+        for ($xy = 0; $xy < count($columns); $xy++) {
+            $spreadsheet->getActiveSheet()->getColumnDimension($columns[$xy])->setAutoSize(true);
         }
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
