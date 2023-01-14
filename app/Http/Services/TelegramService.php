@@ -150,7 +150,9 @@ class TelegramService {
             'will_finish', // for insert new record for incoming waste
             
             'will_send_period_time', // for waste list command
-            'will_send_result_of_period' // for waste list command
+            'will_send_result_of_period', // for waste list command
+
+            'will_send_existing_waste', // for insert outcoming waste
         ];
     }
 
@@ -214,6 +216,12 @@ class TelegramService {
             return $this->flush_redis();
         } else if ($msg == 'input_limbah_keluar') {
             return $this->send_underdevelopment_chat($payload, 'Limbah Keluar');
+            // return $this->send_underdevelopment_chat($payload, 'List Limbah');
+            /**
+             ** Take over the last step action session
+             * 
+             */
+            $last_step_action = 6;
         } else if ($msg == 'list_limbah') {
             // return $this->send_underdevelopment_chat($payload, 'List Limbah');
             /**
@@ -510,6 +518,27 @@ class TelegramService {
         return $this->flush_redis();
     }
 
+    public function send_will_send_existing_waste_chat($payload, $next_step, $msg)
+    {
+        $waste_code = WasteCode::all();
+        $payload['text'] = "Silahkan pilih limbah dulu ya";
+        $textMarkup = [];
+        foreach ($waste_code as $k => $c) {
+            $textMarkup[] = [
+                [
+                    'text' => $c->code,
+                    'callback_data' => $c->code . '@type-type'
+                ]
+            ];
+        }
+        $payload['reply_markup'] = [
+            'inline_keyboard' => $textMarkup,
+            'resize_keyboard' => true
+        ];
+        Http::post($this->url(), $payload);
+        return Redis::set('last_step_action', $next_step);
+    }
+
     public function handle_send_document_request($url, $file)
     {
         // Send dummy file
@@ -618,6 +647,23 @@ class TelegramService {
                 $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", number_format($qty, 2, '.', ''));
                 $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
                 $spreadsheet->getActiveSheet()->setCellValue('L'."$start_row", number_format($d->total_qty, 2, '.', ''));
+
+                /**
+                 ** Write a formula to calculate total waste day by day
+                */
+                if ($start_row == 12) {
+                    $spreadsheet->getActiveSheet()->setCellValue(
+                        'L' . $start_row,
+                        '=F' . $start_row
+                    );
+                }
+
+                if ($start_row != 12) {
+                    $spreadsheet->getActiveSheet()->setCellValue(
+                        'L'. $start_row,
+                        '=L' . ($start_row-1) . '+F' . $start_row . '-H' . $start_row
+                    );
+                }
                 
                 $start_row++;
             }

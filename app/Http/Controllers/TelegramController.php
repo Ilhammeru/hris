@@ -88,32 +88,6 @@ class TelegramController extends Controller
 
                         $tele_service->start_chat($res_message);
 
-                    } else if ($message == '/senddocument') {
-
-                        // Send dummy file
-                        $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_URL, "https://api.telegram.org/bot5972664051:AAEgwN8hAMKh52r19KPUTeALp6kyHUVzorg/sendDocument?chat_id=1991941955");
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                        curl_setopt($ch, CURLOPT_POST, 1);
-
-                        // Create CURLFile
-                        $finfo = finfo_file(finfo_open(FILEINFO_MIME_TYPE), self::DUMMY_FILE);
-                        $cFile = new CURLFile(self::DUMMY_FILE, $finfo);
-
-                        // Add CURLFile to CURL request
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, [
-                            "document" => $cFile,
-                            'text' => 'oke',
-                            'chat_id' => $room_id
-                        ]);
-
-                        // Call
-                        $result = curl_exec($ch);
-
-                        // Show result and close curl
-                        var_dump($result);
-                        curl_close($ch);
-
                     } else {
 
                         $tele_service->send_format_failed($res_message);
@@ -181,6 +155,23 @@ class TelegramController extends Controller
             $spreadsheet->getActiveSheet()->setCellValue('F'."$start_row", $d->in->qty);
             $spreadsheet->getActiveSheet()->setCellValue('G'."$start_row", date('d F Y', strtotime($d->in->exp)));
             
+            /**
+             ** Write a formula to calculate total waste day by day
+             */
+            if ($start_row == 12) {
+                $spreadsheet->getActiveSheet()->setCellValue(
+                    'L' . $start_row,
+                    '=F' . $start_row
+                );
+            }
+
+            if ($start_row != 12) {
+                $spreadsheet->getActiveSheet()->setCellValue(
+                    'L'. $start_row,
+                    '=L' . ($start_row-1) . '+F' . $start_row . '-H' . $start_row
+                );
+            }
+
             $start_row++;
         }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WasteLogIn extends Model
 {
@@ -16,4 +17,9 @@ class WasteLogIn extends Model
         'exp',
         'code_number'
     ];
+
+    public function log(): BelongsTo
+    {
+        return $this->belongsTo(WasteLog::class, 'waste_log_id');
+    }
 }

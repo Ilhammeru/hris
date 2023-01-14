@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\WasteController;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
