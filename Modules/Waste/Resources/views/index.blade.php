@@ -43,16 +43,21 @@
 
     <script>
         $('#date_in_range').daterangepicker({
+            autoUpdateInput: false,
             locale: {
                 format: 'YYYY-MM-DD',
                 cancelLabel: 'Clear'
             }
         }, (start, end, label) => {
-            $('#date_start').val(start.format('YYYY-MM-DD'));
-            $('#date_end').val(end.format('YYYY-MM-DD'));
         }).on('cancel.daterangepicker', function() {
             $('#date_start').val('');
             $('#date_end').val('');
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(
+                picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-DD-MM')
+            );
+            $('#date_start').val(picker.startDate.format('YYYY-MM-DD'));
+            $('#date_end').val(picker.endDate.format('YYYY-MM-DD'));
         });
 
         $('#date_exp_filter').daterangepicker({
