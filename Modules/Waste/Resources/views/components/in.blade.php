@@ -99,12 +99,7 @@
         }
         
         function clearFilter() {
-            let start = $('#date_start').data('date');
-            let end = $('#date_end').data('date');
-            document.getElementById('form-filter-in').reset();
-            $('#date_in_range').val(start + ' - ' + end);
-            $('#date_start').val('');
-            $('#date_end').val('');
+            document.getElementById('form-filter-in').reset();;
             initTableIn();
             $('#cancel-filter').addClass('d-none');
         }

@@ -50,6 +50,7 @@
             }
         }, (start, end, label) => {
         }).on('cancel.daterangepicker', function() {
+            $(this).val('');
             $('#date_start').val('');
             $('#date_end').val('');
         }).on('apply.daterangepicker', function(ev, picker) {
