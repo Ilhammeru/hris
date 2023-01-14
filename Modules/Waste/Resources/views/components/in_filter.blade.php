@@ -22,8 +22,8 @@
             <p class="title">Date In</p>
             <div class="form-group">
                 <input type="text" placeholder="Date in" id="date_in_range" class="form-control form-control-sm">
-                <input type="hidden" id="date_start" name="date_start" value="{{ date('Y-m-d') }}">
-                <input type="hidden" id="date_end" name="date_end" value="{{ date('Y-m-d') }}">
+                <input type="hidden" id="date_start" data-date="{{ date('Y-m-d') }}" name="date_start" value="{{ date('Y-m-d') }}">
+                <input type="hidden" id="date_end" data-date="{{ date('Y-m-d') }}" name="date_end" value="{{ date('Y-m-d') }}">
             </div>
         </div>
         <div class="filter-item">
@@ -53,6 +53,7 @@
         </div>
         <div class="text-end">
             <button class="btn btn-primary btn-sm" type="button" id="apply-filter" onclick="filterIn()">Apply</button>
+            <button class="btn btn-danger btn-sm d-none" type="button" id="cancel-filter" onclick="clearFilter()">Clear</button>
         </div>
     </div>
 </form>

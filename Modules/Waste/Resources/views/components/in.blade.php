@@ -95,6 +95,16 @@
             }
             param.codes = selected;
             initTableIn(param);
+            $('#cancel-filter').removeClass('d-none');
+        }
+        
+        function clearFilter() {
+            let start = $('#date_start').data('date');
+            let end = $('#date_end').data('date');
+            document.getElementById('form-filter-in').reset();
+            $('#date_in_range').val(start + ' - ' + end);
+            initTableIn();
+            $('#cancel-filter').addClass('d-none');
         }
     </script>
 @endpush
