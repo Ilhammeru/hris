@@ -5,5 +5,7 @@
     "Company": true,
     "Recruitment": true,
     "Message": true,
-    "Waste": true
+    "Waste": true,
+    "Attendant": true,
+    "Event": true
 }

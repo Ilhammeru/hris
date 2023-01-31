@@ -144,8 +144,15 @@
 	{{-- sweetalert --}}
 	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+	{{-- master javascript --}}
+	<script src="{{ mix('dist/js/master.js') }}"></script>
+
+	{{-- localization --}}
+	<script src="/js/lang.js"></script>
+
 	<!--end::Page Vendors Javascript-->
 	<script>
+		const base_url = window.location.origin;
 		var dtLanguage = {
 			"sEmptyTable": "Tidak ada data yang tersedia pada tabel ini",
 			"sProcessing": "Sedang memproses...",

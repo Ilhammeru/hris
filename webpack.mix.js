@@ -12,4 +12,16 @@ const mix = require('laravel-mix');
  */
 
 mix.less('resources/css/employee.less', 'public/css')
-    .sourceMaps()s;
+    .js('resources/js/attendant.js', 'dist/js')
+    .js('resources/js/event.js', 'dist/js')
+    .js('resources/js/guestbook.js', 'dist/js')
+    .js('resources/js/master.js', 'dist/js')
+    .setPublicPath('public')
+    .webpackConfig({
+        mode: 'development',
+        optimization: {
+            sideEffects: false
+        }
+    })
+    // .browserSync('http://yayasan.test')
+    .version();

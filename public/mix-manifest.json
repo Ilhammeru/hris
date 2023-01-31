@@ -1,3 +1,7 @@
 {
-    "/css/employee.css": "/css/employee.css"
+    "/dist/js/attendant.js": "/dist/js/attendant.js?id=e9025407cd5363caded4ce19ea348d79",
+    "/dist/js/event.js": "/dist/js/event.js?id=dcf48b6eb4210e63d4eb703a8b4cc78e",
+    "/dist/js/guestbook.js": "/dist/js/guestbook.js?id=c2db9e56add787910cc68a017417684b",
+    "/dist/js/master.js": "/dist/js/master.js?id=943b55d683c47da4dd577151050cf05a",
+    "/css/employee.css": "/css/employee.css?id=0a9daa0642379c0bd23bd1c252b55e33"
 }

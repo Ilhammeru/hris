@@ -20,6 +20,7 @@
         "laravel/ui": "^3.4",
         "laravolt/avatar": "^4.1",
         "laravolt/indonesia": "^0.32.0",
+        "maatwebsite/excel": "^3.1",
         "nwidart/laravel-modules": "^9.0",
         "phpmailer/phpmailer": "^6.6",
         "phpoffice/phpspreadsheet": "^1.26",

@@ -1,0 +1,11 @@
+{
+    "name": "Attendant",
+    "alias": "attendant",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Attendant\\Providers\\AttendantServiceProvider"
+    ],
+    "files": []
+}
