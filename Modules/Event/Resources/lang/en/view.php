@@ -21,4 +21,5 @@ return [
     'signature' => 'Signature',
     'checkin_at' => 'Checkin At',
     'export' => 'Export',
+    'attendee_not_found' => 'Attendant is not register yet in database',
 ];

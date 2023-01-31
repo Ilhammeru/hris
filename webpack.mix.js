@@ -18,7 +18,7 @@ mix.less('resources/css/employee.less', 'public/css')
     .js('resources/js/master.js', 'dist/js')
     .setPublicPath('public')
     .webpackConfig({
-        mode: 'development',
+        mode: 'production',
         optimization: {
             sideEffects: false
         }

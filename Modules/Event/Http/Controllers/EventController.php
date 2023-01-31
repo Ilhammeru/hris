@@ -127,12 +127,20 @@ class EventController extends Controller
     public function check_in(Request $request)
     {
         try {
+            /**
+             * Validation
+             */
             $check = EventAttendees::where('attendant_id', $request->attendant_id)
                 ->where('event_id', $request->event_id)
                 ->first();
             if ($check) {
                 return response()->json(['message' => __('view.already_check_in'), 'status' => 1]);
             }
+            $attendee = AttendantList::find($request->attendant_id);
+            if (!$attendee) {
+                return response()->json(['message' => __('event::view.attendee_not_found')], 500);
+            }
+
             EventAttendees::insert([
                 'attendant_id' => $request->attendant_id,
                 'event_id' => $request->event_id,
