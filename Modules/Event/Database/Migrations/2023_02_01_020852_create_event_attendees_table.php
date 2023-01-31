@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('attendant_id');
             $table->integer('event_id');
             $table->text('signature')->nullable();
-            $table->timestamp('check_in_at');
+            $table->timestamp('check_in_at')->nullable();
             $table->timestamps();
         });
     }
