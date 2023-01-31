@@ -112,6 +112,7 @@ function initListAttendees(id) {
         {data: 'position', name: 'position'},
         {data: 'signature', name: 'signature'},
         {data: 'check_in_at', name: 'check_in_at'},
+        {data: 'vaccine', name: 'vaccine'},
     ];
     let dt_route = base_url + '/event/ajax/' + id;
     dt_attendant_list = setDataTable('table-detail-event-list', columns, dt_route);

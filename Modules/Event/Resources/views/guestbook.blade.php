@@ -157,6 +157,16 @@
                                                     <i class="fa fa-sign-in-alt"></i> 
                                                 </button>
                                             </div>
+                                            <div class="form-group mt-3">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="vaccine" id="vaccine1" checked value="moderna">
+                                                    <label class="form-check-label" for="vaccine1">Moderna</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="vaccine" id="vaccine2" value="pfizer">
+                                                    <label class="form-check-label" for="vaccine2">Pfizer</label>
+                                                </div>
+                                            </div>
                                         </form>
 
                                         

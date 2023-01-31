@@ -3,7 +3,7 @@
     <!--begin::Brand-->
     <div class="header-brand">
         <!--begin::Logo-->
-        <a href="{{ route('employee.index') }}" style="color: #fff; font-size: 18px;">
+        <a href="{{ route('event.index') }}" style="color: #fff; font-size: 18px;">
             {{-- <img alt="Logo" src="{{ asset('images/logo-1-dark.svg') }}" class="h-25px h-lg-25px" /> --}}
             MPS Brondong
         </a>

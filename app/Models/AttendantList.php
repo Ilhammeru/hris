@@ -12,7 +12,7 @@ class AttendantList extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'attendant_lists';
-    protected $fillable = ['employee_id', 'name', 'position_id'];
+    protected $fillable = ['employee_id', 'name', 'position_id', 'vaccine_booster'];
 
     public function position(): BelongsTo
     {

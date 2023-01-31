@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Company\Entities\Position;
@@ -65,11 +66,23 @@ class AttendantController extends Controller
                 );
                 $model->save();
 
+                $employee_id = implode('', explode('-', $row[2]));
+
                 $attendant = AttendantList::firstOrNew(
-                    ['name' => $row[1], 'employee_id' => $row[2], 'position_id' => $model->id]
+                    ['name' => $row[1], 'employee_id' => $employee_id, 'position_id' => $model->id]
                 );
                 $attendant->save();
             }
+            /**
+             * Add to redis
+             */
+            $all = AttendantList::all();
+            $data = collect($all)->map(function ($item) {
+                $item['value'] = $item->name . ' (' . ucfirst(strtolower($item->position->name)) . ')';
+
+                return $item;
+            })->all();
+            Redis::set('attendant_list', json_encode($data));
             DB::commit();
             
             return response()->json(['message' => $data]);
@@ -106,6 +119,17 @@ class AttendantController extends Controller
                 'position_id' => $request->position_id,
             ]
         );
+
+        /**
+         * Add to redis
+         */
+        $all = AttendantList::all();
+        $data = collect($all)->map(function ($item) {
+            $item['value'] = $item->name . ' (' . ucfirst(strtolower($item->position->name)) . ')';
+
+            return $item;
+        })->all();
+        Redis::set('attendant_list', json_encode($data));
 
         return response()->json(['message' => __('view.success_update_data')]);
     }

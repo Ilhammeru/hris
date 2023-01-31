@@ -9,6 +9,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Event\Entities\Event;
 use Modules\Event\Entities\EventAttendees;
@@ -83,6 +84,9 @@ class EventController extends Controller
             ->editColumn('check_in_at', function ($d) {
                 return date('d F Y H:i', strtotime($d->check_in_at));
             })
+            ->addColumn('vaccine', function ($d) {
+                return strtoupper($d->attendant->vaccine_booster) ?? '-';
+            })
             ->rawColumns([
                 'name', 'employee_id', 'position',
                 'signature', 'check_in_at',
@@ -126,6 +130,7 @@ class EventController extends Controller
 
     public function check_in(Request $request)
     {
+        DB::beginTransaction();
         try {
             /**
              * Validation
@@ -134,10 +139,12 @@ class EventController extends Controller
                 ->where('event_id', $request->event_id)
                 ->first();
             if ($check) {
+                DB::rollBack();
                 return response()->json(['message' => __('view.already_check_in'), 'status' => 1]);
             }
             $attendee = AttendantList::find($request->attendant_id);
             if (!$attendee) {
+                DB::rollBack();
                 return response()->json(['message' => __('event::view.attendee_not_found')], 500);
             }
 
@@ -150,8 +157,15 @@ class EventController extends Controller
                 'updated_at' => Carbon::now(),
             ]);
             
+            $vaccine = $request->vaccine;
+            $attend = AttendantList::find($request->attendant_id);
+            $attend->vaccine_booster = $vaccine;
+            $attend->save();
+            DB::commit();
+            
             return response()->json(['message' => __('view.success_check_in')]);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json(['message' => $th->getMessage()], 500);
         }
     }
@@ -159,15 +173,22 @@ class EventController extends Controller
     public function guestbook_list(Request $request)
     {
         $key = $request->term;
-        $data = AttendantList::where('employee_id', 'like', '%' . $key . '%')
-            ->get();
-
-        $data = collect($data)->map(function ($item) {
-            $item['value'] = $item->name . ' (' . ucfirst(strtolower($item->position->name)) . ')';
-
-            return $item;
-        })->all();
-
+        $current = Redis::get('attendant_list');
+        if (!$current) {
+            $data = AttendantList::where('employee_id', 'like', '%' . $key . '%')
+                ->get();
+    
+            $data = collect($data)->map(function ($item) {
+                $item['value'] = $item->name . ' (' . ucfirst(strtolower($item->position->name)) . ')';
+    
+                return $item;
+            })->all();
+            Redis::set('attendant_list', json_encode($data));
+        }
+        $current = json_decode($current, true);
+        $data = collect($current)->where('employee_id', $key)
+            ->values();
+        
         return response()->json($data);
     }
 

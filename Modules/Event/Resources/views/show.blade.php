@@ -20,6 +20,7 @@
                             <th>{{ __('attendant::view.position') }}</th>
                             <th>{{ __('event::view.signature') }}</th>
                             <th>{{ __('event::view.checkin_at') }}</th>
+                            <th>{{ __('event::view.vaccine') }}</th>
                         </tr>
                     </thead>
                 </table>
