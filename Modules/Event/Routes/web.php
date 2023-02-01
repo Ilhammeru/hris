@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/export/{id}', 'EventController@exportAttendees')->name('event.export-attendees');
         Route::get('/{id}', 'EventController@show')->name('event.show');
         Route::get('/{id}/edit', 'EventController@edit')->name('event.edit');
+        Route::put('/{id}/update', 'EventController@update')->name('event.update');
         Route::post('/check_in', 'EventController@check_in')->name('event.check_in');
         Route::get('/guestbook/{slug}', 'EventController@guestbook')->name('event.guestbook');
         Route::post('/get/guestbook/list', 'EventController@guestbook_list')->name('event.guestbook_list');

@@ -147,12 +147,18 @@
                                         <p class="title text-center">{{ $data->name }}</p>
                                         <form action="" id="form-check-in">
                                             <div class="search-group">
-                                                <input type="text" class="form-control w-100" name="search" id="search" oninput="updateButton(this)">
-                                                <input type="hidden" name="attendant_id" value="" id="attendant_id">
+                                                {{-- <input type="text" class="form-control w-100" name="search" id="search" oninput="updateButton(this)"> --}}
+                                                <select name="attendant_id" id="search-attend" class="form-control form-select">
+                                                    <option value=""></option>
+                                                    @foreach ($employees as $item)
+                                                        <option value="{{ $item['id'] }}">{{ $item['name'] }} ({{ $item['employee_id'] }})</option>
+                                                    @endforeach
+                                                </select>
+                                                {{-- <input type="hidden" name="attendant_id" value="" id="attendant_id"> --}}
                                                 <input type="hidden" name="event_id" value="{{ $data->id }}" id="event_id">
                                                 <input type="hidden" name="signature" id="signature_field">
                                                 <button class="btn btn-primary" type="button" id="btn-search"
-                                                    data-option="{{ $data->option_finisher }}" disabled
+                                                    data-option="{{ $data->option_finisher }}"
                                                     onclick="searchData({{ $data->option_finisher }})">
                                                     <i class="fa fa-sign-in-alt"></i> 
                                                 </button>
@@ -165,6 +171,14 @@
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="vaccine" id="vaccine2" value="pfizer">
                                                     <label class="form-check-label" for="vaccine2">Pfizer</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="vaccine" id="vaccine3" value="sinovac">
+                                                    <label class="form-check-label" for="vaccine3">Sinovac</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="vaccine" id="vaccine4" value="astra">
+                                                    <label class="form-check-label" for="vaccine4">Astra</label>
                                                 </div>
                                             </div>
                                         </form>

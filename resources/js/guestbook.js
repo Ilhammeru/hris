@@ -2,26 +2,9 @@ import { Loading } from '../../public/plugins/notiflix/build/notiflix-loading-ai
 import { Notify } from '../../public/plugins/notiflix/build/notiflix-notify-aio';
 import { Confirm } from '../../public/plugins/notiflix/build/notiflix-confirm-aio';
 
-$( "#search" ).autocomplete({
-    source: function( request, response ) {
-      $.ajax( {
-        url: window.location.origin + '/event/get/guestbook/list',
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        type: 'POST',
-        data: {
-          term: request.term
-        },
-        success: function( data ) {
-            response( data );
-        }
-      } );
-    },
-    minLength: 2,
-    select: function( event, ui ) {
-        $('#attendant_id').val(ui.item.id);
-    }
+$('#search-attend').select2({
+    placeholder: "Search ...",
+    allowClear: true
 });
 
 var signaturePad;
@@ -41,7 +24,7 @@ myModalEl.addEventListener('shown.bs.modal', event => {
 // });
 
 function searchData(option) {
-    if ($('#attendant_id').val() != '') {
+    if ($('#search-attend').val() != '') {
         if (option == 1) {
             // show modal signature
             showSignaturePad();
@@ -122,6 +105,7 @@ function submitData() {
                         }
                         document.getElementById('form-check-in').reset();
                         signaturePad.clear();
+                        $('#search-attend').val(null).trigger('change');
                         $('#modalSignature').modal('hide');
                     },
                     error: function(err) {

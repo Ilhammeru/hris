@@ -46,18 +46,21 @@ if (myModalEl) {
 
 function showFormUpdate() {
     toggleModal('modalEvent', 'show');
+    $('#form-update-event').attr('action', base_url + '/event');
+    $('#form-update-event').attr('method', 'POST');
 }
 
 function saveEvent() {
     let form = $('#form-update-event');
-    let url = base_url + '/event';
+    let url = form.attr('action');
+    let method = form.attr('method');
     let data = form.serialize();
 
     let validate = validateForm('form-update-event', 'error');
 
     if (validate) {
         $.ajax({
-            type: 'POST',
+            type: method,
             url: url,
             data: data,
             beforeSend: function() {
@@ -95,6 +98,10 @@ function editItem(id) {
             }
             $('#start_date').val(res.data.event_date);
             $('#event_id_field').val(res.data.id);
+
+            // manipulate form
+            $('#form-update-event').attr('action', base_url + '/event/' + id + '/update');
+            $('#form-update-event').attr('method', 'PUT');
         }
     })
 }

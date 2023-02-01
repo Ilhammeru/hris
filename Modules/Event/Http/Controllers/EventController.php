@@ -124,8 +124,14 @@ class EventController extends Controller
     {
         $data = Event::where('slug', $slug)
             ->first();
-
-        return view('event::guestbook', compact('data'));
+        $current = Redis::get('attendant_list');
+        if (!$current) {
+            $all = AttendantList::all();
+            Redis::set('attendant_list', json_encode($all));
+        }
+        $current = json_decode($current, true);
+        $employees = $current;
+        return view('event::guestbook', compact('data', 'employees'));
     }
 
     public function check_in(Request $request)
@@ -176,6 +182,7 @@ class EventController extends Controller
         $current = Redis::get('attendant_list');
         if (!$current) {
             $data = AttendantList::where('employee_id', 'like', '%' . $key . '%')
+                ->orWhere('name', 'LIKE', '%' . $key . '%')
                 ->get();
     
             $data = collect($data)->map(function ($item) {
@@ -208,26 +215,22 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->event_id_field) {
-            return $this->update($request, $request->event_id_field);
-        } else {
-            $event_date = $request->event_date;
-            $exp = explode(' - ', $event_date);
-            $start_date = date('Y-m-d H:i', strtotime($exp[0]));
-            $end_date = date('Y-m-d H:i', strtotime($exp[1]));
-            $slug = implode('-', explode(' ', strtolower($request->name)));
-            
-            $payload = [
-                'name' => $request->name,
-                'slug' => $slug,
-                'option_finisher' => $request->option_finisher,
-                'start_date' => $start_date,
-                'end_date' => $end_date,
-            ];
-            Event::insert($payload);
-    
-            return response()->json(['message' => __('event::view.success_create_event')]);
-        }
+        $event_date = $request->event_date;
+        $exp = explode(' - ', $event_date);
+        $start_date = date('Y-m-d H:i', strtotime($exp[0]));
+        $end_date = date('Y-m-d H:i', strtotime($exp[1]));
+        $slug = implode('-', explode(' ', strtolower($request->name)));
+        
+        $payload = [
+            'name' => $request->name,
+            'slug' => $slug,
+            'option_finisher' => $request->option_finisher,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+        ];
+        Event::insert($payload);
+
+        return response()->json(['message' => __('event::view.success_create_event')]);
     }
 
     /**
