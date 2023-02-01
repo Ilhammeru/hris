@@ -23,5 +23,5 @@ mix.less('resources/css/employee.less', 'public/css')
             sideEffects: false
         }
     })
-    // .browserSync('http://yayasan.test')
+    // .browserSync('http://hris.test')
     .version();

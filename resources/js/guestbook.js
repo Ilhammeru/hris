@@ -57,6 +57,7 @@ function searchData(option) {
                             } else {
                                 Notify.success(res.message);
                             }
+                            $('#search-attend').val(null).trigger('change');
                             document.getElementById('form-check-in').reset();
                             $('#modalSignature').modal('hide');
                             if (signaturePad) {
