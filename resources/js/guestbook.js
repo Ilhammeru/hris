@@ -104,7 +104,6 @@ function submitData() {
                             Notify.success(res.message);
                         }
                         document.getElementById('form-check-in').reset();
-                        signaturePad.clear();
                         $('#search-attend').val(null).trigger('change');
                         $('#modalSignature').modal('hide');
                     },
