@@ -11,7 +11,9 @@ var signaturePad;
 
 const myModalEl = document.getElementById('modalSignature')
 myModalEl.addEventListener('hidden.bs.modal', event => {
-    signaturePad.clear()
+    if(signaturePad) {
+        signaturePad.clear()
+    }
 })
 myModalEl.addEventListener('shown.bs.modal', event => {
     showSignaturePad();
@@ -57,7 +59,9 @@ function searchData(option) {
                             }
                             document.getElementById('form-check-in').reset();
                             $('#modalSignature').modal('hide');
-                            signaturePad.clear();
+                            if (signaturePad) {
+                                signaturePad.clear();
+                            }
                         },
                         error: function(err) {
                             Loading.remove();
@@ -71,8 +75,10 @@ function searchData(option) {
 }
 
 function submitData() {
-    if (signaturePad.isEmpty()) {
-        Notify.warning(i18n.view.signature_failed);
+    if (signaturePad) {
+        if (signaturePad.isEmpty() ) {
+            Notify.warning(i18n.view.signature_failed);
+        }
     } else {
         var dataSignature = signaturePad.toDataURL('image/png');
         $('#signature_field').val(dataSignature);
@@ -105,7 +111,9 @@ function submitData() {
                             Notify.success(res.message);
                         }
                         $('#modalSignature').modal('hide');
-                        signaturePad.clear();
+                        if (signaturePad) {
+                            signaturePad.clear();
+                        }
                     },
                     error: function(err) {
                         Loading.remove();
