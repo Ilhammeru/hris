@@ -56,11 +56,10 @@ function searchData(option) {
                                 Notify.success(res.message);
                             }
                             document.getElementById('form-check-in').reset();
-                            signaturePad.clear();
                             $('#modalSignature').modal('hide');
+                            signaturePad.clear();
                         },
                         error: function(err) {
-                            console.log('err',err);
                             Loading.remove();
                             Notify.warning(err.responseJSON ? err.responseJSON.message : i18n.view.failed_communication);
                         }
@@ -98,17 +97,17 @@ function submitData() {
                     },
                     success: function(res) {
                         Loading.remove();
+                        document.getElementById('form-check-in').reset();
+                        $('#search-attend').val(null).trigger('change');
                         if (res.status) {
                             Notify.warning(res.message);
                         } else {
                             Notify.success(res.message);
                         }
-                        document.getElementById('form-check-in').reset();
-                        $('#search-attend').val(null).trigger('change');
                         $('#modalSignature').modal('hide');
+                        signaturePad.clear();
                     },
                     error: function(err) {
-                        console.log('err',err);
                         Loading.remove();
                         Notify.warning(err.responseJSON ? err.responseJSON.message : i18n.view.failed_communication);
                     }

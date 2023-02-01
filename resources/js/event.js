@@ -74,7 +74,6 @@ function saveEvent() {
                 resetForm('form-update-event');
             },
             error: function(err) {
-                console.log('err',err);
                 Loading.remove();
                 Notify.warning(err.responseJSON ? err.responseJSON.message : i18n.view.failed_communication);
             }
